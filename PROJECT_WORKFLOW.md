@@ -393,7 +393,7 @@ The remote ADK environment still requires one manual Render setup action: create
 
 ## 29. Firebase Hosting deployment
 
-The repository did not contain `firebase-hosting-merge.yml`, `firebase-hosting-pull-request.yml`, `firebase.json`, or `.firebaserc`; they are now added. `.firebaserc` targets Firebase project `feisty-lambda-481111-a7`, and `firebase.json` deploys the Vite `dist` directory with SPA fallback routing.
+The repository contains `firebase-hosting-merge.yml`, `firebase-hosting-pull-request.yml`, `firebase.json`, and `.firebaserc`. `.firebaserc` targets Firebase project `project-notes-62970`, and `firebase.json` deploys the Vite `dist` directory with SPA fallback routing.
 
 The new workflows use Firebase CLI with the legacy `FIREBASE_TOKEN` secret instead of the broken generated service-account workflow. This avoids the missing `github-action-...@...iam.gserviceaccount.com` lookup and does not require creating a Google service-account key. The merge workflow deploys the live Hosting channel; the pull-request workflow deploys a seven-day preview channel.
 

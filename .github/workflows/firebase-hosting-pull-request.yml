@@ -16,6 +16,7 @@ on:
 
 jobs:
   preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -41,4 +42,4 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Deploy preview channel
-        run: npx --yes firebase-tools@latest hosting:channel:deploy "pr-${{ github.event.number }}" --project feisty-lambda-481111-a7 --token "$FIREBASE_TOKEN" --expires 7d --non-interactive
+        run: npx --yes firebase-tools@latest hosting:channel:deploy "pr-${{ github.event.number }}" --project project-notes-62970 --token "$FIREBASE_TOKEN" --expires 7d --non-interactive

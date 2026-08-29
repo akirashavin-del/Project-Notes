@@ -42,4 +42,4 @@ jobs:
       - run: npm ci
       - run: npm run build
       - name: Deploy live Hosting site
-        run: npx --yes firebase-tools@latest deploy --only hosting --project feisty-lambda-481111-a7 --token "$FIREBASE_TOKEN" --non-interactive
+        run: npx --yes firebase-tools@latest deploy --only hosting --project project-notes-62970 --token "$FIREBASE_TOKEN" --non-interactive
