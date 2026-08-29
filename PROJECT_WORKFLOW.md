@@ -391,6 +391,21 @@ The no-billing deployment target is Render. Its official free tier supports web 
 
 The remote ADK environment still requires one manual Render setup action: create/sync the Blueprint and enter the secrets in the Render Dashboard. This workspace cannot create that external account or service without the user's Render login and service identifiers.
 
+## 29. Firebase Hosting deployment
+
+The repository did not contain `firebase-hosting-merge.yml`, `firebase-hosting-pull-request.yml`, `firebase.json`, or `.firebaserc`; they are now added. `.firebaserc` targets Firebase project `feisty-lambda-481111-a7`, and `firebase.json` deploys the Vite `dist` directory with SPA fallback routing.
+
+The new workflows use Firebase CLI with the legacy `FIREBASE_TOKEN` secret instead of the broken generated service-account workflow. This avoids the missing `github-action-...@...iam.gserviceaccount.com` lookup and does not require creating a Google service-account key. The merge workflow deploys the live Hosting channel; the pull-request workflow deploys a seven-day preview channel.
+
+Required GitHub repository secrets:
+
+- `FIREBASE_TOKEN`, created once with `firebase login:ci` on a trusted machine.
+- `VITE_AGENT_API_URL`, set to the deployed Render API URL plus `/api`.
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, and optionally `VITE_SUPABASE_ANON_KEY`.
+- The `VITE_FIREBASE_*` values and `VITE_FIREBASE_VAPID_KEY` if browser notifications are enabled.
+
+Firebase's current CLI documentation labels `FIREBASE_TOKEN` as legacy and recommends Application Default Credentials for CI. It remains the no-service-account-key fallback for this billing-constrained setup; if Google Cloud identity becomes available later, replace it with the recommended identity-based authentication. Do not put `FIREBASE_TOKEN`, Gemini keys, or GitHub tokens in the Vite bundle.
+
 The browser uses `VITE_AGENT_API_URL=/api`, and Vite proxies that path to `http://localhost:8787`. Therefore a local 502 means the Node API is running but an upstream service failed; a browser message saying the backend is unreachable means the Node API is not running or the proxy is not configured. Check `GET /api/health` first. It reports the active agent mode, compiler endpoint, research adapters, and whether API auth is required.
 
 The compiler adapter no longer makes the optional Judge0 language catalog a hard dependency. It caches a successful catalog for five minutes and uses Judge0 CE fallback ids for Python 71, C/GCC 50, and Java 62 when the catalog endpoint returns a transient gateway error. Submissions still pass through the configured online compiler, and transient compiler gateway responses are retried.
