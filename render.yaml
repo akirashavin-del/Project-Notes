@@ -1,0 +1,56 @@
+services:
+  - type: web
+    name: project-notebook-adk
+    runtime: docker
+    dockerfilePath: ./server/agents/notebook_agent/Dockerfile
+    dockerContext: .
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: GOOGLE_API_KEY
+        sync: false
+      - key: ADK_SERVICE_TOKEN
+        sync: false
+
+  - type: web
+    name: project-notebook-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: NODE_ENV
+        value: production
+      - key: REQUIRE_API_AUTH
+        value: true
+      - key: REQUIRE_REMOTE_ADK
+        value: true
+      - key: ADK_APP_NAME
+        value: notebook_agent
+      - key: ADK_SERVICE_URL
+        sync: false
+      - key: ADK_SERVICE_TOKEN
+        sync: false
+      - key: APP_ORIGIN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: GITHUB_TOKEN
+        sync: false
+      - key: GITHUB_DEFAULT_OWNER
+        sync: false
+      - key: GITHUB_REPOSITORY_URL
+        value: https://github.com/akirashavin-del/Project-Notes.git
+      - key: ONLINE_COMPILER_URL
+        value: https://ce.judge0.com

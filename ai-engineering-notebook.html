@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Engineering Notebook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EEF1EC;
+    --paper-card:#FBFAF6;
+    --paper-card-dim:#F3F4EF;
+    --ink:#14201C;
+    --ink-soft:#4A554E;
+    --ink-faint:#8B968E;
+    --line:#C7D0C9;
+    --line-strong:#9FAC9F;
+    --teal:#1F6F6B;
+    --teal-dim:#E4EEEC;
+    --amber:#B87F27;
+    --amber-dim:#F4EBDA;
+    --red:#B3402F;
+    --red-dim:#F5E4DF;
+    --radius:3px;
+    --serif:'IBM Plex Serif', Georgia, serif;
+    --sans:'IBM Plex Sans', -apple-system, sans-serif;
+    --mono:'IBM Plex Mono', 'SF Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--amber-dim);color:var(--ink);}
+  :focus-visible{outline:2px solid var(--teal);outline-offset:2px;}
+
+  /* ---------- background grid (graph paper) ---------- */
+  .page-grid{
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:28px 28px;
+    background-position:-1px -1px;
+    opacity:1;
+  }
+
+  /* ---------- app shell ---------- */
+  .app{
+    display:grid;
+    grid-template-columns:72px 1fr;
+    grid-template-rows:64px 1fr;
+    grid-template-areas:
+      "spine header"
+      "spine main";
+    height:100vh;
+    min-height:640px;
+  }
+  @media (max-width:760px){
+    .app{grid-template-columns:56px 1fr;}
+  }
+
+  /* ---------- header ---------- */
+  header{
+    grid-area:header;
+    background:var(--paper-card);
+    border-bottom:1px solid var(--line-strong);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+  }
+  .brand{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+  }
+  .brand-mark{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    color:var(--teal);
+    border:1px solid var(--teal);
+    padding:2px 6px;
+    border-radius:2px;
+  }
+  .brand-name{
+    font-family:var(--serif);
+    font-size:18px;
+    font-weight:500;
+    letter-spacing:.01em;
+  }
+  .header-right{
+    display:flex;
+    align-items:center;
+    gap:22px;
+  }
+  .project-title{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--ink-soft);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .project-title input{
+    font-family:var(--mono);
+    font-size:12.5px;
+    border:none;
+    background:transparent;
+    color:var(--ink);
+    border-bottom:1px dashed var(--line-strong);
+    padding:2px 0;
+    width:230px;
+  }
+  .project-title input:focus{outline:none;border-bottom:1px solid var(--teal);}
+  .stage-flag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+  }
+  .stage-flag b{color:var(--teal);font-weight:600;}
+
+  /* ---------- spine (signature element) ---------- */
+  .spine{
+    grid-area:spine;
+    background:#122320;
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:24px 0 18px;
+  }
+  .spine-thread{
+    position:absolute;
+    top:56px; bottom:34px; left:50%;
+    width:1px;
+    background:linear-gradient(#3C5A54, #3C5A54);
+    transform:translateX(-.5px);
+  }
+  .spine-nodes{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    flex:1;
+    width:100%;
+    align-items:center;
+  }
+  .spine-node{
+    position:relative;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+    background:transparent;
+    border:none;
+    cursor:pointer;
+    padding:6px 0;
+    z-index:2;
+  }
+  .spine-node .dot{
+    width:13px;height:13px;border-radius:50%;
+    border:1.5px solid #5C7C74;
+    background:#122320;
+    transition:all .15s ease;
+  }
+  .spine-node .lbl{
+    font-family:var(--mono);
+    font-size:9px;
+    letter-spacing:.14em;
+    color:#6E8A82;
+    writing-mode:vertical-rl;
+    text-orientation:mixed;
+    transform:rotate(180deg);
+  }
+  .spine-node.done .dot{background:#3C5A54;border-color:#6E8A82;}
+  .spine-node.done .dot::after{
+    content:"";
+    display:block;width:5px;height:5px;border-radius:50%;
+    background:var(--amber);margin:3px auto 0;
+  }
+  .spine-node.active .dot{
+    background:var(--amber);
+    border-color:var(--amber);
+    box-shadow:0 0 0 4px rgba(184,127,39,.22);
+  }
+  .spine-node.active .lbl{color:var(--paper);}
+  .spine-node:hover .lbl{color:#B8CCC5;}
+
+  /* ---------- main ---------- */
+  main{
+    grid-area:main;
+    overflow-y:auto;
+    position:relative;
+  }
+  .stage{
+    display:none;
+    max-width:1180px;
+    margin:0 auto;
+    padding:40px 40px 90px;
+  }
+  .stage.active{display:block;}
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    color:var(--teal);
+    margin:0 0 8px;
+  }
+  h1.stage-title{
+    font-family:var(--serif);
+    font-size:32px;
+    font-weight:500;
+    margin:0 0 6px;
+    letter-spacing:-.01em;
+  }
+  .stage-sub{
+    color:var(--ink-soft);
+    font-size:14.5px;
+    margin:0 0 34px;
+    max-width:640px;
+    line-height:1.55;
+  }
+
+  .card{
+    background:var(--paper-card);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+  }
+  .card-pad{padding:22px 24px;}
+
+  .field-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-faint);
+    display:block;
+    margin-bottom:7px;
+  }
+  input[type=text], textarea, select{
+    width:100%;
+    font-family:var(--sans);
+    font-size:14px;
+    color:var(--ink);
+    background:var(--paper-card-dim);
+    border:1px solid var(--line-strong);
+    border-radius:var(--radius);
+    padding:10px 12px;
+  }
+  textarea{resize:vertical;font-family:var(--serif);font-size:15px;line-height:1.6;}
+  input:focus, textarea:focus, select:focus{outline:none;border-color:var(--teal);background:var(--paper-card);}
+
+  .btn{
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:600;
+    border-radius:var(--radius);
+    padding:9px 16px;
+    border:1px solid var(--ink);
+    background:var(--ink);
+    color:var(--paper-card);
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn:hover{background:#233631;}
+  .btn.ghost{
+    background:transparent;color:var(--ink);border-color:var(--line-strong);
+  }
+  .btn.ghost:hover{border-color:var(--ink);}
+  .btn.teal{background:var(--teal);border-color:var(--teal);}
+  .btn.teal:hover{background:#195a56;}
+  .btn.sm{padding:6px 11px;font-size:12px;}
+
+  /* ---------- PROFILE ---------- */
+  .profile-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:28px;}
+  .form-row{margin-bottom:18px;}
+  .form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;}
+  .segmented{display:flex;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;}
+  .segmented button{
+    flex:1;font-family:var(--mono);font-size:11.5px;letter-spacing:.04em;
+    padding:9px 4px;background:var(--paper-card-dim);border:none;border-right:1px solid var(--line-strong);
+    color:var(--ink-soft);cursor:pointer;
+  }
+  .segmented button:last-child{border-right:none;}
+  .segmented button.on{background:var(--teal);color:#fff;}
+
+  .know-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:12.5px;}
+  .know-table th{
+    text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-faint);font-weight:600;padding:0 0 8px;border-bottom:1px solid var(--line-strong);
+  }
+  .know-table td{padding:9px 0;border-bottom:1px solid var(--line);}
+  .lvl-pill{
+    display:inline-block;padding:2px 9px;border-radius:20px;font-size:10.5px;letter-spacing:.03em;
+  }
+  .lvl-Beginner{background:var(--red-dim);color:var(--red);}
+  .lvl-Intermediate{background:var(--amber-dim);color:var(--amber);}
+  .lvl-Advanced{background:var(--teal-dim);color:var(--teal);}
+  .lvl-Expert{background:#1F6F6B;color:#fff;}
+
+  .note-box{
+    margin-top:16px;padding:14px 16px;background:var(--amber-dim);border-left:3px solid var(--amber);
+    font-size:13px;color:#5A4416;border-radius:0 var(--radius) var(--radius) 0;
+  }
+
+  /* ---------- IDEA ---------- */
+  .idea-flow{display:grid;grid-template-columns:1fr 44px 1fr;align-items:start;gap:0;}
+  .flow-arrow{display:flex;align-items:center;justify-content:center;height:100%;padding-top:120px;color:var(--line-strong);}
+  .idea-textarea{min-height:230px;}
+  .chip-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+  .chip-block{border:1px solid var(--line);border-radius:var(--radius);padding:10px 12px;background:var(--paper-card-dim);}
+  .chip-block .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--teal);display:block;margin-bottom:4px;}
+  .chip-block .v{font-size:13px;color:var(--ink);line-height:1.45;}
+  .tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;}
+  .tag{font-family:var(--mono);font-size:11px;background:var(--teal-dim);color:var(--teal);padding:3px 8px;border-radius:20px;}
+  .tag.unknown{background:var(--red-dim);color:var(--red);}
+
+  .prompt-toggle{display:flex;gap:0;margin:26px 0 12px;border:1px solid var(--line-strong);width:fit-content;border-radius:var(--radius);overflow:hidden;}
+  .prompt-toggle button{font-family:var(--mono);font-size:11.5px;padding:7px 14px;border:none;background:var(--paper-card-dim);cursor:pointer;color:var(--ink-soft);}
+  .prompt-toggle button.on{background:var(--ink);color:#fff;}
+
+  /* ---------- RESEARCH ---------- */
+  .research-layout{display:grid;grid-template-columns:1fr 320px;gap:26px;}
+  .result-card{padding:18px 20px;margin-bottom:14px;}
+  .result-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:10px;}
+  .result-type{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);}
+  .result-title{font-family:var(--serif);font-size:16.5px;font-weight:500;margin:2px 0 0;}
+  .score-badge{font-family:var(--mono);font-size:18px;color:var(--teal);font-weight:600;text-align:right;}
+  .score-badge span{display:block;font-size:9px;letter-spacing:.08em;color:var(--ink-faint);font-weight:400;text-transform:uppercase;}
+  .meters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:12px 0;}
+  .meter-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.05em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:4px;}
+  .meter-track{height:4px;background:var(--line);border-radius:2px;overflow:hidden;}
+  .meter-fill{height:100%;background:var(--teal);}
+  .why-box{font-size:13px;color:var(--ink-soft);line-height:1.55;background:var(--paper-card-dim);border-radius:var(--radius);padding:10px 12px;margin:10px 0 12px;}
+  .why-box b{color:var(--ink);font-weight:600;}
+  .result-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  .rside-title{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:12px;}
+  .graph-mini{width:100%;height:150px;}
+  .qa-item{padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer;color:var(--ink-soft);}
+  .qa-item:hover{color:var(--teal);}
+  .qa-item:last-child{border-bottom:none;}
+
+  /* ---------- BUILD ---------- */
+  .build-split{display:grid;grid-template-rows:auto auto;gap:0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;}
+  .code-pane{background:#122320;color:#DDE7E2;}
+  .code-toolbar{
+    display:flex;justify-content:space-between;align-items:center;padding:10px 16px;
+    border-bottom:1px solid #2A403B;font-family:var(--mono);font-size:11px;color:#8FAAA1;
+  }
+  .code-toolbar .filename{color:#DDE7E2;}
+  .code-body{padding:16px 0;font-family:var(--mono);font-size:13px;line-height:1.85;}
+  .code-line{display:grid;grid-template-columns:40px 1fr;padding:0 16px;}
+  .code-line .ln{color:#4C6660;text-align:right;padding-right:14px;user-select:none;}
+  .code-line.hl{background:rgba(184,127,39,.18);border-left:2px solid var(--amber);}
+  .tok-kw{color:#5FA8FF;} .tok-type{color:#7FD6C8;} .tok-str{color:#E3B778;} .tok-fn{color:#D6A4E8;} .tok-com{color:#5C7C74;}
+
+  .teacher-pane{background:var(--paper-card);border-top:1px solid var(--line-strong);}
+  .teacher-head{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);}
+  .teacher-head .who{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);}
+  .teacher-body{padding:18px 20px;display:grid;grid-template-columns:1fr 260px;gap:24px;}
+  .explain-text{font-family:var(--serif);font-size:15px;line-height:1.65;color:var(--ink);}
+  .explain-meta{display:grid;gap:10px;}
+  .meta-row{font-size:12px;}
+  .meta-row .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);display:block;margin-bottom:3px;}
+
+  .lvl-tabs{display:flex;gap:0;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;width:fit-content;}
+  .lvl-tabs button{font-family:var(--mono);font-size:11px;padding:6px 12px;border:none;border-right:1px solid var(--line-strong);background:var(--paper-card-dim);cursor:pointer;color:var(--ink-soft);}
+  .lvl-tabs button:last-child{border-right:none;}
+  .lvl-tabs button.on{background:var(--amber);color:#fff;}
+
+  .subsection{margin-top:34px;}
+  .subsection-title{font-family:var(--serif);font-size:19px;font-weight:500;margin:0 0 4px;}
+  .subsection-sub{font-size:13px;color:var(--ink-soft);margin:0 0 16px;}
+
+  .optimize-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .opt-col{padding:14px 16px;}
+  .opt-col .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);margin-bottom:8px;display:block;}
+  .opt-code{font-family:var(--mono);font-size:12px;line-height:1.7;background:var(--paper-card-dim);border-radius:var(--radius);padding:10px 12px;white-space:pre;overflow-x:auto;}
+
+  .error-card{border-left:3px solid var(--red);}
+  .error-pipeline{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--ink-faint);margin-bottom:14px;flex-wrap:wrap;}
+  .error-pipeline .step{padding:3px 8px;border:1px solid var(--line-strong);border-radius:20px;}
+  .error-pipeline .arrow{color:var(--line-strong);}
+  .raw-error{font-family:var(--mono);font-size:12.5px;background:#2A1815;color:#E6A697;padding:9px 12px;border-radius:var(--radius);margin-bottom:12px;}
+  .explain-final{font-family:var(--serif);font-size:14.5px;line-height:1.6;color:var(--ink);background:var(--red-dim);padding:14px 16px;border-radius:var(--radius);}
+
+  /* ---------- PRESENT ---------- */
+  .present-layout{display:grid;grid-template-columns:300px 1fr;gap:28px;}
+  .toc-item{display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:1px solid var(--line);font-size:13px;}
+  .toc-item .num{font-family:var(--mono);font-size:10.5px;color:var(--ink-faint);width:18px;}
+  .toc-dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+  .toc-dot.pending{background:var(--line-strong);}
+
+  .slide-preview{
+    aspect-ratio:16/9;background:#0F1B18;border-radius:var(--radius);
+    display:flex;flex-direction:column;justify-content:center;padding:40px 48px;
+    color:#EDEFEA;position:relative;overflow:hidden;
+  }
+  .slide-preview::before{
+    content:"";position:absolute;inset:0;
+    background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+    background-size:24px 24px;
+  }
+  .slide-eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--amber);position:relative;margin-bottom:10px;}
+  .slide-title{font-family:var(--serif);font-size:30px;font-weight:500;position:relative;max-width:80%;line-height:1.25;}
+  .slide-foot{position:relative;margin-top:18px;font-family:var(--mono);font-size:10.5px;color:#7E958E;}
+
+  .latex-box{
+    margin-top:16px;font-family:var(--mono);font-size:11.5px;line-height:1.7;background:#122320;color:#B8CCC5;
+    padding:16px 18px;border-radius:var(--radius);white-space:pre;overflow-x:auto;
+  }
+  .latex-box .l1{color:#5FA8FF;} .latex-box .l2{color:#E3B778;}
+
+  .present-actions{display:flex;gap:10px;margin-top:18px;}
+
+  hr.rule{border:none;border-top:1px solid var(--line-strong);margin:30px 0;}
+
+  @media (max-width:900px){
+    .profile-grid, .idea-flow, .research-layout, .teacher-body, .present-layout, .optimize-grid, .chip-grid{grid-template-columns:1fr;}
+    .flow-arrow{display:none;}
+  }
+</style>
+</head>
+<body class="page-grid">
+
+<div class="app">
+
+  <!-- SPINE -->
+  <nav class="spine" aria-label="Project stages">
+    <div class="spine-thread"></div>
+    <div class="spine-nodes">
+      <button class="spine-node done" data-stage="profile" aria-current="false">
+        <span class="dot"></span><span class="lbl">PROFILE</span>
+      </button>
+      <button class="spine-node done" data-stage="idea">
+        <span class="dot"></span><span class="lbl">IDEA</span>
+      </button>
+      <button class="spine-node active" data-stage="research">
+        <span class="dot"></span><span class="lbl">RESEARCH</span>
+      </button>
+      <button class="spine-node" data-stage="build">
+        <span class="dot"></span><span class="lbl">BUILD</span>
+      </button>
+      <button class="spine-node" data-stage="present">
+        <span class="dot"></span><span class="lbl">PRESENT</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- HEADER -->
+  <header>
+    <div class="brand">
+      <span class="brand-mark">AEN</span>
+      <span class="brand-name">AI Engineering Notebook</span>
+    </div>
+    <div class="header-right">
+      <div class="project-title">
+        PROJECT&nbsp;/ <input type="text" value="Cross-Language Semantic Compiler" aria-label="Project title">
+      </div>
+      <div class="stage-flag">STAGE&nbsp;03 · <b id="stageFlagName">RESEARCH</b></div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- ============ PROFILE ============ -->
+    <section class="stage" id="stage-profile">
+      <p class="eyebrow">Stage 01</p>
+      <h1 class="stage-title">Before we start — who's building this?</h1>
+      <p class="stage-sub">Tell the notebook what you know. It shapes how deep the research goes, how code gets explained, and what it teaches you along the way.</p>
+
+      <div class="profile-grid">
+        <div class="card card-pad">
+          <div class="form-row-2">
+            <div>
+              <label class="field-label">Name</label>
+              <input type="text" value="Akira">
+            </div>
+            <div>
+              <label class="field-label">Role / Year</label>
+              <input type="text" value="Founder, independent builder">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <label class="field-label">What I want to build</label>
+            <textarea rows="2">A system that reads code across languages and reasons about it as one semantic program.</textarea>
+          </div>
+
+          <div class="form-row">
+            <label class="field-label">What I want to achieve</label>
+            <textarea rows="2">A working prototype I can demo, and a real understanding of how semantic IRs and compiler pipelines work.</textarea>
+          </div>
+
+          <div class="form-row">
+            <label class="field-label">Preferred explanation level</label>
+            <div class="segmented">
+              <button>Beginner</button>
+              <button class="on">Intermediate</button>
+              <button>Advanced</button>
+              <button>Expert</button>
+            </div>
+          </div>
+
+          <div class="form-row" style="margin-bottom:0;">
+            <label class="field-label">Technical subjects known</label>
+            <div class="tag-row">
+              <span class="tag">Data structures</span>
+              <span class="tag">Web dev</span>
+              <span class="tag">Applied ML</span>
+              <span class="tag">+ Add subject</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-pad">
+          <p class="rside-title" style="margin-bottom:16px;">Generated knowledge model</p>
+          <table class="know-table">
+            <thead><tr><th>Subject</th><th>Level</th></tr></thead>
+            <tbody>
+              <tr><td>Java</td><td><span class="lvl-pill lvl-Beginner">Beginner</span></td></tr>
+              <tr><td>Python</td><td><span class="lvl-pill lvl-Intermediate">Intermediate</span></td></tr>
+              <tr><td>Algorithms</td><td><span class="lvl-pill lvl-Intermediate">Intermediate</span></td></tr>
+              <tr><td>Compilers</td><td><span class="lvl-pill lvl-Beginner">Beginner</span></td></tr>
+              <tr><td>AI / ML</td><td><span class="lvl-pill lvl-Advanced">Advanced</span></td></tr>
+            </tbody>
+          </table>
+          <div class="note-box">This controls research depth and code explanations. The notebook will only teach what the current project actually needs.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;">
+        <button class="btn teal" onclick="goStage('idea')">Continue to Idea →</button>
+      </div>
+    </section>
+
+    <!-- ============ IDEA ============ -->
+    <section class="stage" id="stage-idea">
+      <p class="eyebrow">Stage 02</p>
+      <h1 class="stage-title">Write the idea the way it lives in your head</h1>
+      <p class="stage-sub">No forms to fight with. Write naturally — the notebook extracts the structure and always shows you what it changed.</p>
+
+      <div class="idea-flow">
+        <div class="card card-pad">
+          <label class="field-label">Original idea</label>
+          <textarea class="idea-textarea">I want to create a system where different programming languages can be understood semantically and combined into one executable workflow. Right now if part of my logic is in Python and part needs to be fast in Java or C, I have to glue it together myself. I want the tool to understand the intent of each block and let them work together.</textarea>
+        </div>
+
+        <div class="flow-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" stroke-width="1.4"/></svg>
+        </div>
+
+        <div>
+          <div class="card card-pad">
+            <label class="field-label">AI interpretation</label>
+            <div class="chip-grid">
+              <div class="chip-block"><span class="k">Problem</span><span class="v">Cross-language logic requires manual glue code and loses semantic context.</span></div>
+              <div class="chip-block"><span class="k">Objective</span><span class="v">Unify multiple languages under one executable semantic model.</span></div>
+              <div class="chip-block"><span class="k">Domain</span><span class="v">Compilers · Program synthesis · Semantic IR</span></div>
+              <div class="chip-block"><span class="k">Proposed approach</span><span class="v">Language-agnostic intermediate representation with a compatibility engine.</span></div>
+              <div class="chip-block"><span class="k">Expected output</span><span class="v">A working prototype that compiles and runs mixed-language blocks.</span></div>
+              <div class="chip-block"><span class="k">Constraints</span><span class="v">Single practical backend for v1; extend later.</span></div>
+            </div>
+            <div class="tag-row" style="margin-top:14px;">
+              <span class="tag unknown">Unknown: AST lowering</span>
+              <span class="tag unknown">Unknown: dependency graphs</span>
+              <span class="tag">Candidate: LLVM</span>
+              <span class="tag">Candidate: Tree-sitter</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="prompt-toggle">
+        <button class="on">Optimized research prompt</button>
+        <button>Compare to original</button>
+      </div>
+      <div class="card card-pad">
+        <textarea rows="3">What structured intermediate representations and compatibility-checking techniques allow independently-parsed code blocks from different source languages to be merged into one executable semantic graph, with isolated execution for incompatible segments?</textarea>
+        <p style="font-size:12px;color:var(--ink-faint);margin:10px 0 0;">Editable. Your original idea is never replaced — only translated into a sharper research question.</p>
+      </div>
+
+      <div style="margin-top:24px;display:flex;gap:10px;">
+        <button class="btn teal" onclick="goStage('research')">Send to Research →</button>
+        <button class="btn ghost">Re-interpret idea</button>
+      </div>
+    </section>
+
+    <!-- ============ RESEARCH ============ -->
+    <section class="stage" id="stage-research">
+      <p class="eyebrow">Stage 03</p>
+      <h1 class="stage-title">Research, ranked against your actual problem</h1>
+      <p class="stage-sub">Every source is scored against your idea across four dimensions — not just semantic similarity — with a plain-language reason attached.</p>
+
+      <div class="research-layout">
+        <div>
+          <div class="card result-card">
+            <div class="result-head">
+              <div>
+                <span class="result-type">Research paper · arXiv</span>
+                <h3 class="result-title">Tree-sitter: An Incremental Parsing System for Programming Tools</h3>
+              </div>
+              <div class="score-badge">94%<span>overall</span></div>
+            </div>
+            <div class="meters">
+              <div><div class="meter-lbl">Semantic</div><div class="meter-track"><div class="meter-fill" style="width:94%"></div></div></div>
+              <div><div class="meter-lbl">Problem align.</div><div class="meter-track"><div class="meter-fill" style="width:91%"></div></div></div>
+              <div><div class="meter-lbl">Technical</div><div class="meter-track"><div class="meter-fill" style="width:89%"></div></div></div>
+              <div><div class="meter-lbl">Architecture</div><div class="meter-track"><div class="meter-fill" style="width:87%"></div></div></div>
+            </div>
+            <div class="why-box"><b>Why this matters —</b> This directly supports the language-detection and parsing stage of your semantic engine: multi-language grammars feeding one AST layer.</div>
+            <div class="result-actions">
+              <button class="btn sm ghost">Open</button>
+              <button class="btn sm ghost">Save</button>
+              <button class="btn sm ghost">Highlight</button>
+              <button class="btn sm ghost">Connect to idea</button>
+              <button class="btn sm teal">Ask AI</button>
+            </div>
+          </div>
+
+          <div class="card result-card">
+            <div class="result-head">
+              <div>
+                <span class="result-type">Documentation · LLVM.org</span>
+                <h3 class="result-title">LLVM Language Reference — Intermediate Representation</h3>
+              </div>
+              <div class="score-badge">88%<span>overall</span></div>
+            </div>
+            <div class="meters">
+              <div><div class="meter-lbl">Semantic</div><div class="meter-track"><div class="meter-fill" style="width:85%"></div></div></div>
+              <div><div class="meter-lbl">Problem align.</div><div class="meter-track"><div class="meter-fill" style="width:83%"></div></div></div>
+              <div><div class="meter-lbl">Technical</div><div class="meter-track"><div class="meter-fill" style="width:92%"></div></div></div>
+              <div><div class="meter-lbl">Architecture</div><div class="meter-track"><div class="meter-fill" style="width:90%"></div></div></div>
+            </div>
+            <div class="why-box"><b>Why this matters —</b> Candidate lowering target once your own semantic IR is stable — relevant to Stage 13, not Stage 09. Read later.</div>
+            <div class="result-actions">
+              <button class="btn sm ghost">Open</button>
+              <button class="btn sm ghost">Save</button>
+              <button class="btn sm ghost">Highlight</button>
+              <button class="btn sm ghost">Connect to idea</button>
+              <button class="btn sm teal">Ask AI</button>
+            </div>
+          </div>
+
+          <div class="card result-card" style="margin-bottom:0;">
+            <div class="result-head">
+              <div>
+                <span class="result-type">GitHub repository</span>
+                <h3 class="result-title">graalvm/truffle — Language Implementation Framework</h3>
+              </div>
+              <div class="score-badge">76%<span>overall</span></div>
+            </div>
+            <div class="meters">
+              <div><div class="meter-lbl">Semantic</div><div class="meter-track"><div class="meter-fill" style="width:74%"></div></div></div>
+              <div><div class="meter-lbl">Problem align.</div><div class="meter-track"><div class="meter-fill" style="width:71%"></div></div></div>
+              <div><div class="meter-lbl">Technical</div><div class="meter-track"><div class="meter-fill" style="width:80%"></div></div></div>
+              <div><div class="meter-lbl">Architecture</div><div class="meter-track"><div class="meter-fill" style="width:68%"></div></div></div>
+            </div>
+            <div class="why-box"><b>Why this matters —</b> Interesting precedent, but built for interpreter composition rather than compiled semantic merging — partial overlap, not a direct fit.</div>
+            <div class="result-actions">
+              <button class="btn sm ghost">Open</button>
+              <button class="btn sm ghost">Save</button>
+              <button class="btn sm ghost">Reject</button>
+              <button class="btn sm ghost">Connect to idea</button>
+              <button class="btn sm teal">Ask AI</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card card-pad" style="margin-bottom:18px;">
+            <p class="rside-title">Research graph</p>
+            <svg class="graph-mini" viewBox="0 0 280 150">
+              <line x1="140" y1="20" x2="60" y2="80" stroke="#C7D0C9" stroke-width="1"/>
+              <line x1="140" y1="20" x2="220" y2="70" stroke="#C7D0C9" stroke-width="1"/>
+              <line x1="140" y1="20" x2="140" y2="120" stroke="#C7D0C9" stroke-width="1"/>
+              <line x1="60" y1="80" x2="140" y2="120" stroke="#C7D0C9" stroke-width="1" stroke-dasharray="2 3"/>
+              <circle cx="140" cy="20" r="7" fill="#B87F27"/>
+              <circle cx="60" cy="80" r="6" fill="#1F6F6B"/>
+              <circle cx="220" cy="70" r="6" fill="#1F6F6B"/>
+              <circle cx="140" cy="120" r="6" fill="#9FAC9F"/>
+              <text x="140" y="12" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4A554E">idea</text>
+              <text x="60" y="96" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4A554E">tree-sitter</text>
+              <text x="220" y="86" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4A554E">llvm</text>
+              <text x="140" y="136" text-anchor="middle" font-family="IBM Plex Mono" font-size="8" fill="#4A554E">truffle</text>
+            </svg>
+          </div>
+
+          <div class="card card-pad">
+            <p class="rside-title">Ask about your research</p>
+            <div class="qa-item">Why is this paper relevant to my project?</div>
+            <div class="qa-item">Which part of my architecture does this support?</div>
+            <div class="qa-item">Does this research contradict my approach?</div>
+            <div class="qa-item">What should I learn from this before I build?</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:24px;">
+        <button class="btn teal" onclick="goStage('build')">Continue to Build →</button>
+      </div>
+    </section>
+
+    <!-- ============ BUILD ============ -->
+    <section class="stage" id="stage-build">
+      <p class="eyebrow">Stage 04</p>
+      <h1 class="stage-title">Code on top, a teacher underneath</h1>
+      <p class="stage-sub">Highlight any block and the AI Teacher explains it in context — of the whole program, and of what you already know.</p>
+
+      <div class="build-split">
+        <div class="code-pane">
+          <div class="code-toolbar">
+            <span class="filename">semantic_reduce.py</span>
+            <span>Python · block 3 of 7</span>
+          </div>
+          <div class="code-body">
+            <div class="code-line"><span class="ln">1</span><span><span class="tok-kw">def</span> <span class="tok-fn">semantic_sum</span>(arr):</span></div>
+            <div class="code-line"><span class="ln">2</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tok-com"># reduce block — highlighted below</span></span></div>
+            <div class="code-line hl"><span class="ln">3</span><span>&nbsp;&nbsp;&nbsp;&nbsp;sum = <span class="tok-str">0</span></span></div>
+            <div class="code-line hl"><span class="ln">4</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tok-kw">for</span> i <span class="tok-kw">in</span> <span class="tok-fn">range</span>(<span class="tok-fn">len</span>(arr)):</span></div>
+            <div class="code-line hl"><span class="ln">5</span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sum += arr[i]</span></div>
+            <div class="code-line"><span class="ln">6</span><span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tok-kw">return</span> sum</span></div>
+            <div class="code-line"><span class="ln">7</span><span></span></div>
+            <div class="code-line"><span class="ln">8</span><span><span class="tok-com"># → passed to compatibility_engine(sum, next_block)</span></span></div>
+          </div>
+        </div>
+
+        <div class="teacher-pane">
+          <div class="teacher-head">
+            <span class="who">● AI Teacher — explaining lines 3–5</span>
+            <div class="lvl-tabs">
+              <button data-lvl="beg">Beginner</button>
+              <button data-lvl="int" class="on">Intermediate</button>
+              <button data-lvl="adv">Advanced</button>
+            </div>
+          </div>
+          <div class="teacher-body">
+            <div class="explain-text" id="teacherText">
+              This performs an indexed traversal over <code>arr</code> and maintains an accumulator in <code>sum</code>. Each iteration reads one element and folds it into the running total — a classic linear reduction.
+            </div>
+            <div class="explain-meta">
+              <div class="meta-row"><span class="k">Produces</span>a single scalar <code>sum</code></div>
+              <div class="meta-row"><span class="k">Depends on</span><code>arr</code> from block 2</div>
+              <div class="meta-row"><span class="k">Feeds into</span><code>compatibility_engine()</code></div>
+              <div class="meta-row"><span class="k">New concept</span>loop-carried accumulator</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">Baseline optimizer</h3>
+        <p class="subsection-sub">Nothing changes silently — every suggestion shows what changed, why, and what it risks.</p>
+        <div class="card">
+          <div class="optimize-grid">
+            <div class="opt-col">
+              <span class="k">Current</span>
+              <div class="opt-code">sum = 0
+for i in range(len(arr)):
+    sum += arr[i]</div>
+            </div>
+            <div class="opt-col" style="border-left:1px solid var(--line);">
+              <span class="k">Suggested</span>
+              <div class="opt-code">total = sum(arr)</div>
+            </div>
+          </div>
+          <div class="card-pad" style="padding-top:0;">
+            <div class="why-box"><b>Why it's better —</b> Uses the built-in reduction — same O(n) complexity, clearer intent, avoids shadowing the <code>sum</code> built-in. <b>Semantically equivalent.</b> No behavioral risk on this input type.</div>
+            <div class="result-actions">
+              <button class="btn sm teal">Accept</button>
+              <button class="btn sm ghost">Reject</button>
+              <button class="btn sm ghost">Compare</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="subsection">
+        <h3 class="subsection-title">Explainable error</h3>
+        <p class="subsection-sub">Errors are taught, not just reported.</p>
+        <div class="card error-card card-pad">
+          <div class="error-pipeline">
+            <span class="step">raw error</span><span class="arrow">→</span>
+            <span class="step">normalizer</span><span class="arrow">→</span>
+            <span class="step">structured IR</span><span class="arrow">→</span>
+            <span class="step">explainable AI</span>
+          </div>
+          <div class="raw-error">TypeError: expected int, got string — at compatibility_boundary(block_2, block_3)</div>
+          <div class="explain-final">The previous Python block produced a <b>string</b>, but the next block expects a <b>number</b>. This breaks the compatibility boundary between the two blocks. Convert the value to an integer before it crosses into block 3 — for example, <code>int(value)</code> right before the return.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px;">
+        <button class="btn teal" onclick="goStage('present')">Continue to Present →</button>
+      </div>
+    </section>
+
+    <!-- ============ PRESENT ============ -->
+    <section class="stage" id="stage-present">
+      <p class="eyebrow">Stage 05</p>
+      <h1 class="stage-title">Everything you built, structured into a presentation</h1>
+      <p class="stage-sub">Assembled from your actual idea, research, code and results — never invented. Exports as clean LaTeX Beamer.</p>
+
+      <div class="present-layout">
+        <div class="card card-pad">
+          <p class="rside-title">Outline</p>
+          <div class="toc-item"><span class="num">01</span><span class="toc-dot"></span>Title</div>
+          <div class="toc-item"><span class="num">02</span><span class="toc-dot"></span>Problem statement</div>
+          <div class="toc-item"><span class="num">03</span><span class="toc-dot"></span>Motivation</div>
+          <div class="toc-item"><span class="num">04</span><span class="toc-dot"></span>Existing approaches</div>
+          <div class="toc-item"><span class="num">05</span><span class="toc-dot"></span>Research gap</div>
+          <div class="toc-item"><span class="num">06</span><span class="toc-dot"></span>Proposed architecture</div>
+          <div class="toc-item"><span class="num">07</span><span class="toc-dot"></span>Semantic code engine</div>
+          <div class="toc-item"><span class="num">08</span><span class="toc-dot"></span>Explainable AI</div>
+          <div class="toc-item"><span class="num">09</span><span class="toc-dot pending"></span>Implementation</div>
+          <div class="toc-item"><span class="num">10</span><span class="toc-dot pending"></span>Results</div>
+          <div class="toc-item"><span class="num">11</span><span class="toc-dot pending"></span>Limitations</div>
+          <div class="toc-item" style="border-bottom:none;"><span class="num">12</span><span class="toc-dot pending"></span>Conclusion</div>
+        </div>
+
+        <div>
+          <div class="slide-preview">
+            <p class="slide-eyebrow">Proposed architecture</p>
+            <p class="slide-title">A common semantic IR for cross-language compatibility</p>
+            <p class="slide-foot">Slide 06 · 15 total</p>
+          </div>
+
+          <div class="latex-box"><span class="l1">\begin{frame}</span>{Proposed Architecture}
+  \begin{itemize}
+    <span class="l2">\item</span> Language-agnostic semantic IR
+    <span class="l2">\item</span> Compatibility engine for cross-block merging
+    <span class="l2">\item</span> Isolated execution for incompatible segments
+  \end{itemize}
+<span class="l1">\end{frame}</span></div>
+
+          <div class="present-actions">
+            <button class="btn teal">Export Beamer (.tex)</button>
+            <button class="btn ghost">Regenerate from project state</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+  const stages = ['profile','idea','research','build','present'];
+  function goStage(id){
+    stages.forEach(s=>{
+      document.getElementById('stage-'+s).classList.toggle('active', s===id);
+    });
+    document.querySelectorAll('.spine-node').forEach(btn=>{
+      const s = btn.dataset.stage;
+      btn.classList.remove('active');
+      if (s===id) btn.classList.add('active');
+      else if (stages.indexOf(s) < stages.indexOf(id)) btn.classList.add('done');
+      else btn.classList.remove('done');
+    });
+    document.getElementById('stageFlagName').textContent = id.toUpperCase();
+    document.querySelector('main').scrollTop = 0;
+  }
+  document.querySelectorAll('.spine-node').forEach(btn=>{
+    btn.addEventListener('click', ()=>goStage(btn.dataset.stage));
+  });
+  goStage('research');
+
+  // knowledge-level segmented control (profile) — visual only
+  document.querySelectorAll('.segmented').forEach(seg=>{
+    seg.querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+      });
+    });
+  });
+
+  // AI teacher level tabs
+  const explanations = {
+    beg: "This loop goes through every number in the list, one at a time, and adds it to a running total called <code>sum</code>. By the end, <code>sum</code> holds everything added together.",
+    int: "This performs an indexed traversal over <code>arr</code> and maintains an accumulator in <code>sum</code>. Each iteration reads one element and folds it into the running total — a classic linear reduction.",
+    adv: "This is an O(n) reduction with a loop-carried dependency through <code>sum</code> — sequential by construction, though the accumulation is associative and could be re-expressed as a parallel fold."
+  };
+  document.querySelectorAll('.lvl-tabs button').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      document.querySelectorAll('.lvl-tabs button').forEach(x=>x.classList.remove('on'));
+      b.classList.add('on');
+      document.getElementById('teacherText').innerHTML = explanations[b.dataset.lvl];
+    });
+  });
+
+  // prompt toggle (idea page) — visual only
+  document.querySelectorAll('.prompt-toggle').forEach(tg=>{
+    tg.querySelectorAll('button').forEach(b=>{
+      b.addEventListener('click', ()=>{
+        tg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));
+        b.classList.add('on');
+      });
+    });
+  });
+</script>
+</body>
+</html>
