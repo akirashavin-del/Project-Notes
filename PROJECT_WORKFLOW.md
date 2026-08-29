@@ -405,3 +405,7 @@ Required Render setup:
 - Add GitHub Actions secrets `RENDER_API_KEY`, `RENDER_ADK_SERVICE_ID`, and `RENDER_API_SERVICE_ID`.
 
 Do not put Gemini or GitHub tokens in `VITE_` variables. Any token previously pasted into chat should be revoked and replaced before production.
+
+## 28. GitHub handoff status
+
+The complete workspace is committed locally on branch `main` at commit `e01d490` (`Merge completed production notebook into main`). `.env.local` remains ignored and is not included. The remote `main` branch still points to its original README-only commit because GitHub rejected the supplied fine-grained token with `403 Resource not accessible by personal access token` for both Git HTTPS and Git Data API writes. The token authenticates as `akirashavin-del`, but GitHub must issue a replacement token with repository `Contents: Read and write` access for `akirashavin-del/Project-Notes` before the commit can be pushed.
