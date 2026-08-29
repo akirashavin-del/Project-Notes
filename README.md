@@ -30,3 +30,5 @@ The configured GitHub target is `Project-Notes`. Add a GitHub token with reposit
 npm run build
 npm run lint
 ```
+
+Project-Notes: for making projects on phone.
