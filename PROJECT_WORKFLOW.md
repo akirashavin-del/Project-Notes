@@ -424,3 +424,7 @@ Do not put Gemini or GitHub tokens in `VITE_` variables. Any token previously pa
 ## 28. GitHub handoff status
 
 The complete workspace is committed locally on branch `main` at commit `e01d490` (`Merge completed production notebook into main`). `.env.local` remains ignored and is not included. The remote `main` branch still points to its original README-only commit because GitHub rejected the supplied fine-grained token with `403 Resource not accessible by personal access token` for both Git HTTPS and Git Data API writes. The token authenticates as `akirashavin-del`, but GitHub must issue a replacement token with repository `Contents: Read and write` access for `akirashavin-del/Project-Notes` before the commit can be pushed.
+
+## 30. ADK container dependency fix
+
+The Render ADK build failed because `fastapi==0.115.12` conflicted with `google-adk==1.39.0`, which requires `fastapi>=0.133`. `server/agents/notebook_agent/requirements.txt` now uses bounded compatible ranges (`fastapi>=0.133,<1`, `httpx>=0.28,<1`, and `uvicorn>=0.34,<1`). The resolver now accepts the dependency set; the pip upgrade notice was unrelated.
