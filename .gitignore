@@ -28,3 +28,7 @@ __pycache__/
 *.njsproj
 *.sln
 *.sw?
+# AI / Agent tooling
+.agents/
+.claude/
+skills-lock.json
