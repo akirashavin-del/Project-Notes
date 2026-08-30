@@ -215,10 +215,12 @@ const ResearchStage = () => {
     setResearchState({ status: 'running', message: '', scholarUrl: '' });
     try {
       const response = await searchResearch({ query: searchQuery, limit: 8 });
-      mergeResearchPapers(response.result.results || []);
+      const results = response.result.results || [];
+      mergeResearchPapers(results);
       mergeProblemStatements(response.result.problemStatements || []);
-      const unavailable = Object.values(response.result.providers).find((provider) => provider.message && !provider.results?.length);
-      setResearchState({ status: 'done', message: unavailable?.message || `${response.result.results?.length || 0} research results added.`, scholarUrl: response.result.providers.googleScholar.searchUrl });
+      const count = results.length;
+      const msg = count > 0 ? `${count} live research paper records retrieved.` : 'No research papers found for this query.';
+      setResearchState({ status: 'done', message: msg, scholarUrl: response.result.providers?.googleScholar?.searchUrl });
     } catch (error) {
       setResearchState({ status: 'error', message: error.message, scholarUrl: '' });
     }
@@ -350,7 +352,7 @@ const UIStage = () => {
     try {
       const response = await runAgentTask({ task: 'generate_ui', project: { id: project.id, idea, projectDefinition }, input: { files: (codeFiles || []).map((file) => ({ path: file.path, language: file.language, role: file.role })), requirement: 'Design a simple phone-first interface for the verified project. Do not add features unrelated to the project.' } });
       const spec = response.result;
-      if (!spec?.screens?.length) throw new Error('The AI returned no usable interface screens.');
+      if (!spec?.screens?.length) throw new Error('AI generation completed but returned no usable interface screens.');
       setUIDefinition(spec);
       setUIState({ status: 'done', error: '' });
     } catch (error) { setUIState({ status: 'error', error: error.message }); }
