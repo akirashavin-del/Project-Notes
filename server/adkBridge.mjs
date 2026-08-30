@@ -63,6 +63,14 @@ async function runDirectGemini({ task, input, project }, timeoutMs) {
     ? 'Return exactly {"files":[{"path":"src/main.py","language":"python","role":"entry","content":"..."}]} with 2-5 small, relevant, runnable files. Use the requested language, keep dependencies standard-library only, and never invent APIs, citations, metrics, or project requirements.'
     : task === 'generate_ui'
       ? 'Return exactly {"title":"...","screens":[{"name":"...","purpose":"...","fields":["..."],"actions":["..."]}],"flow":["..."]}. Keep it practical, accessible, and grounded in the supplied project.'
+    : task === 'explain_build_error'
+      ? 'Return exactly {"cause":"...","evidence":"...","nextAction":"...","explanation":"..."}. Turn the compiler or runtime diagnostic into a clear cause, evidence, next action, and plain explanation.'
+    : task === 'interpret_idea'
+      ? 'Return exactly {"problem":"...","objective":"...","domain":"...","proposedApproach":"...","expectedOutput":"...","constraints":["..."]}. Translate the raw idea into a structured project definition.'
+    : task === 'write_notes'
+      ? 'Return exactly {"notes":"..."}. Format structured markdown project notes from verified project facts.'
+    : task === 'write_slides'
+      ? 'Return exactly {"slides":[{"title":"...","content":"..."}]}. Create concise presentation slides from verified project facts.'
     : 'Return exactly one JSON object with short plain-language fields.';
   const instruction = `You are the semantic writing worker for Project Notebook. Task: ${task}. Use only facts in the supplied JSON. Do not invent results, citations, metrics, compiler facts, or files. ${taskRule} If information is missing, say so instead of guessing.`;
   const controller = new AbortController();

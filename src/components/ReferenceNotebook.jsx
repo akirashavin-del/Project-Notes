@@ -73,8 +73,29 @@ const ProfileStage = () => {
 };
 
 const IdeaStage = () => {
-  const { idea, setIdea, setActiveStep } = useProject();
+  const { project, idea, setIdea, setActiveStep } = useProject();
+  const [interpretState, setInterpretState] = useState({ status: 'idle', error: '' });
   const update = (field, value) => setIdea((current) => ({ ...current, [field]: value }));
+  const interpretIdea = async () => {
+    setInterpretState({ status: 'running', error: '' });
+    try {
+      const response = await runAgentTask({ task: 'interpret_idea', project: { id: project?.id || 'idea' }, input: { rawIdea: idea.rawIdea } });
+      const res = response.result;
+      if (res) {
+        setIdea((current) => ({
+          ...current,
+          problem: res.problem || current.problem,
+          objective: res.objective || current.objective,
+          domain: res.domain || current.domain,
+          proposedApproach: res.proposedApproach || current.proposedApproach,
+          expectedOutput: res.expectedOutput || current.expectedOutput,
+        }));
+      }
+      setInterpretState({ status: 'done', error: '' });
+    } catch (err) {
+      setInterpretState({ status: 'error', error: err.message });
+    }
+  };
   const chips = [
     ['Problem', idea.problem],
     ['Objective', idea.objective],
@@ -91,9 +112,10 @@ const IdeaStage = () => {
         <div className="flow-arrow"><ArrowRight size={24} /></div>
         <div><div className="card card-pad"><label className="field-label">AI interpretation</label><div className="chip-grid">{chips.map(([key, value]) => <div className="chip-block" key={key}><span className="k">{key}</span><span className="v">{value || 'Not interpreted yet.'}</span></div>)}</div><div className="tag-row" style={{ marginTop: 14 }}>{(idea.unknownConcepts || []).slice(0, 3).map((item) => <span className="tag unknown" key={item}>Unknown: {item}</span>)}{(idea.techStack || []).slice(0, 3).map((item) => <span className="tag" key={item}>Candidate: {item}</span>)}</div></div></div>
       </div>
+      {interpretState.status === 'error' && <div className="build-result error" style={{ margin: '12px 0' }}><b>AI interpretation failed</b><span>{interpretState.error}</span></div>}
       <div className="prompt-toggle"><button className="on">Optimized research prompt</button><button>Compare to original</button></div>
       <div className="card card-pad"><textarea className="notebook-textarea" rows="3" value={idea.optimizedPrompt || ''} onChange={(e) => update('optimizedPrompt', e.target.value)} /><p style={{ fontSize: 12, color: 'var(--ink-faint)', margin: '10px 0 0' }}>Editable. Your original idea is never replaced — only translated into a sharper research question.</p></div>
-      <StageActions><PrimaryButton onClick={() => setActiveStep('research')}>Send to Research <ArrowRight size={15} /></PrimaryButton><GhostButton>Re-interpret idea</GhostButton></StageActions>
+      <StageActions><PrimaryButton onClick={() => setActiveStep('research')}>Send to Research <ArrowRight size={15} /></PrimaryButton><GhostButton onClick={interpretIdea} disabled={interpretState.status === 'running'}>{interpretState.status === 'running' ? 'Interpreting...' : 'Re-interpret idea'}</GhostButton></StageActions>
     </section>
   );
 };
@@ -238,6 +260,7 @@ const BuildStage = () => {
   const { project, idea, projectDefinition, code, codeFiles, activeFileId, activeLanguage, switchFile, replaceCodeFiles, updateCode, selectedCode, setSelectedCode, explanationDepth, setExplanationDepth, setActiveStep } = useProject();
   const [compileState, setCompileState] = useState({ status: 'idle', result: null, error: '' });
   const [teacherState, setTeacherState] = useState({ status: 'idle', result: null, error: '' });
+  const [errorTeacherState, setErrorTeacherState] = useState({ status: 'idle', result: null, error: '' });
   const [generationState, setGenerationState] = useState({ status: 'idle', error: '' });
   const [stdin, setStdin] = useState('');
   const lines = (code || '').split('\n');
@@ -254,6 +277,7 @@ const BuildStage = () => {
   const verifyCode = async () => {
     if (activeFile?.role !== 'entry') { setCompileState({ status: 'error', result: null, error: 'Select an entry file to compile. Test and support files stay in the stack for context.' }); return; }
     setCompileState({ status: 'running', result: null, error: '' });
+    setErrorTeacherState({ status: 'idle', result: null, error: '' });
     try { setCompileState({ status: 'done', result: await compileCode({ language: activeLanguage, code, stdin }), error: '' }); }
     catch (error) { setCompileState({ status: 'error', result: null, error: error.message }); }
   };
@@ -273,8 +297,25 @@ const BuildStage = () => {
     try { setTeacherState({ status: 'done', result: await runAgentTask({ task: 'explain_code', project: { id: project.id, idea, projectDefinition }, input: { language: activeLanguage, code, selectedCode, level: explanationDepth } }), error: '' }); }
     catch (error) { setTeacherState({ status: 'error', result: null, error: error.message }); }
   };
+  const explainBuildErrorWithAI = async () => {
+    const diagnostic = compilerMessage?.stderr || compileState.error || compilerMessage?.stdout || 'Compiler error detected.';
+    setErrorTeacherState({ status: 'running', result: null, error: '' });
+    try {
+      const response = await runAgentTask({
+        task: 'explain_build_error',
+        project: { id: project.id, idea, projectDefinition },
+        input: { language: activeLanguage, code, diagnostic }
+      });
+      setErrorTeacherState({ status: 'done', result: response.result, error: '' });
+    } catch (err) {
+      setErrorTeacherState({ status: 'error', result: null, error: err.message });
+    }
+  };
+
   const compilerMessage = compileState.result?.result;
   const teacherText = teacherState.result?.result;
+  const errorText = errorTeacherState.result;
+
   return <section className="notebook-stage">
     <StageIntro stageId="build" title="Build in small, readable files" subtitle="Edit the real source, select any line, compile it online, and see the exact output before asking the AI teacher." />
     <div className="build-split build-workspace">
@@ -284,12 +325,12 @@ const BuildStage = () => {
         {generationState.status === 'error' && <div className="build-result error"><b>AI file generation failed</b><span>{generationState.error}</span></div>}
         <div className="code-editor-wrap"><div className="code-gutter" aria-hidden="true">{lines.map((_, index) => <span className={highlighted === index ? 'active' : ''} key={index}>{index + 1}</span>)}</div><textarea className="code-editor" aria-label={`${fileName} source code`} value={code} onChange={(event) => updateCode(event.target.value)} onSelect={selectLine} spellCheck="false" /></div>
         <div className="compiler-input"><label className="field-label" htmlFor="compiler-stdin">STANDARD INPUT (OPTIONAL)</label><textarea id="compiler-stdin" className="notebook-textarea" rows="2" value={stdin} onChange={(event) => setStdin(event.target.value)} placeholder="Values passed to the program at run time" /></div>
-        {compileState.status !== 'idle' && <div className={`compile-output ${compileState.status}`}><div className="compile-output-head"><b>{compileState.status === 'done' && compilerMessage?.verified ? 'Online compiler accepted this file.' : compileState.status === 'running' ? 'Running the configured online compiler…' : 'Compiler returned an error.'}</b>{compilerMessage?.status && <span>{compilerMessage.status} · exit {compilerMessage.exitCode ?? '—'}</span>}</div><div className="output-grid"><div><span className="field-label">PROGRAM OUTPUT</span><pre>{compilerMessage?.stdout || '(no stdout)'}</pre></div><div><span className="field-label">DIAGNOSTIC</span><pre>{compilerMessage?.stderr || compileState.error || '(no diagnostic)'}</pre></div></div></div>}
+        {compileState.status !== 'idle' && <div className={`compile-output ${compileState.status}`}><div className="compile-output-head"><b>{compileState.status === 'done' && compilerMessage?.verified ? 'Online compiler accepted this file.' : compileState.status === 'running' ? 'Running the configured online compiler…' : 'Compiler returned an error.'}</b>{compilerMessage?.status && <span>{compilerMessage.status} · exit {compilerMessage.exitCode ?? '—'}</span>}</div><div className="output-grid"><div><span className="field-label">PROGRAM OUTPUT</span><pre>{compilerMessage?.stdout || '(no stdout)'}</pre></div><div><span className="field-label">DIAGNOSTIC</span><pre>{compilerMessage?.stderr || compileState.error || '(no diagnostic)'}</pre></div></div>{(!compilerMessage?.verified || compileState.status === 'error' || compilerMessage?.stderr) && <div style={{ marginTop: 10, display: 'flex', gap: 10, alignItems: 'center' }}><button className="notebook-btn sm teal" onClick={explainBuildErrorWithAI} disabled={errorTeacherState.status === 'running'}>{errorTeacherState.status === 'running' ? 'Analyzing diagnostic...' : 'Explain diagnostic with AI'}</button>{errorTeacherState.status === 'error' && <span className="research-search-message error">{errorTeacherState.error}</span>}</div>}</div>}
       </div>
       <div className="teacher-pane"><div className="teacher-head"><span className="who">● AI Teacher {selectedCode ? `— line ${highlighted + 1}` : '— select a line'}</span><div className="lvl-tabs">{['Beginner', 'Intermediate', 'Advanced'].map((level) => <button className={explanationDepth === level ? 'on' : ''} key={level} onClick={() => setExplanationDepth(level)}>{level}</button>)}</div></div><div className="teacher-body"><div className="explain-text">{teacherText ? (teacherText.explanation || teacherText.summary || JSON.stringify(teacherText)) : selectedCode ? explanations[explanationDepth] : explanations.Adaptive}</div><div className="explain-meta"><div className="meta-row"><span className="k">Selected code</span>{selectedCode || 'Nothing selected'}</div><div className="meta-row"><span className="k">Produces</span>Compiler output and the next project step</div><div className="meta-row"><span className="k">Depends on</span>{fileName} and the current project definition</div><div className="meta-row"><span className="k">Status</span>{teacherState.status === 'error' ? teacherState.error : teacherState.status === 'done' ? 'AI explanation ready' : 'Ready'}</div></div><StageActions><GhostButton onClick={explainWithAI} disabled={!selectedCode || teacherState.status === 'running'}>{teacherState.status === 'running' ? 'Asking teacher…' : 'Ask AI teacher'}</GhostButton></StageActions></div></div>
     </div>
     {compileState.status !== 'idle' && <div className="compile-flow" role="img" aria-label={`Compilation flow for ${fileName}: source file to online compiler to ${compilerMessage?.verified ? 'accepted output' : 'diagnostic'}`}><div className="compile-flow-node"><b>{fileName}</b><span>source file</span></div><span className="compile-flow-arrow">→</span><div className="compile-flow-node"><b>Judge0</b><span>online compiler</span></div><span className="compile-flow-arrow">→</span><div className={`compile-flow-node ${compilerMessage?.verified ? 'success' : 'failure'}`}><b>{compilerMessage?.verified ? 'Accepted' : 'Diagnostic'}</b><span>{compilerMessage?.stdout ? 'output available' : compilerMessage?.stderr || compileState.error || 'waiting'}</span></div></div>}
-    <div className="subsection"><h3 className="subsection-title">Readable build rule</h3><p className="subsection-sub">Keep each file small. The stack above separates language entry points; compile one file at a time and use the output to guide the next change.</p></div>
+    <div className="subsection"><h3 className="subsection-title">Explainable diagnostic</h3><p className="subsection-sub">Errors are taught, not just reported. Turn any compiler diagnostic into clear cause, evidence, and next action.</p><div className="card error-card card-pad"><div className="error-pipeline"><span className="step">compiler/runtime</span><span className="arrow">→</span><span className="step">normalizer</span><span className="arrow">→</span><span className="step">structured error</span><span className="arrow">→</span><span className="step">plain explanation</span></div>{errorText ? <div className="explain-final"><b>Cause:</b> {errorText.cause || errorText.explanation}<br/>{errorText.evidence && <><b>Evidence:</b> {errorText.evidence}<br/></>}{errorText.nextAction && <><b>Next Action:</b> {errorText.nextAction}</>}</div> : <div className="explain-final">{(compilerMessage?.stderr || compileState.error) ? `Diagnostic captured: ${compilerMessage?.stderr || compileState.error}` : 'No verified error has been recorded for this project yet. When a compiler run returns a diagnostic, click "Explain diagnostic with AI" to analyze it.'}</div>}{(!compilerMessage?.verified || compileState.error || compilerMessage?.stderr) && <div style={{ marginTop: 12 }}><PrimaryButton onClick={explainBuildErrorWithAI} disabled={errorTeacherState.status === 'running'}>{errorTeacherState.status === 'running' ? 'Asking AI Agent...' : 'Explain diagnostic with AI'}</PrimaryButton></div>}</div></div>
     <StageActions><PrimaryButton onClick={() => setActiveStep('ui')}>Continue to UI <ArrowRight size={15} /></PrimaryButton></StageActions>
   </section>;
 };
@@ -321,9 +362,36 @@ const UIStage = () => {
 void LegacyUIStage;
 
 const NotesStage = () => {
-  const { idea, projectNotes, setProjectNotes, setActiveStep } = useProject();
+  const { project, idea, projectDefinition, projectNotes, setProjectNotes, setActiveStep } = useProject();
+  const [notesState, setNotesState] = useState({ status: 'idle', error: '' });
   const value = projectNotes || `# ${idea.domain || 'Project'}\n\nWhat it does\n\nHow it works\n\nImportant decisions\n\nResearch used\n\nProblems and solutions\n\nFuture improvements`;
-  return <section className="notebook-stage"><StageIntro stageId="notes" title="Write down what you learned" subtitle="Notes are generated from the project state, then kept short and useful for revision, handoff, and presentation." /><div className="card card-pad"><label className="field-label">Project notes</label><textarea className="notebook-textarea" style={{ minHeight: 390 }} value={value} onChange={(e) => setProjectNotes(e.target.value)} /></div><StageActions><PrimaryButton onClick={() => setActiveStep('present')}>Continue to Presentation <ArrowRight size={15} /></PrimaryButton></StageActions></section>;
+  const generateNotes = async () => {
+    setNotesState({ status: 'running', error: '' });
+    try {
+      const response = await runAgentTask({
+        task: 'write_notes',
+        project: { id: project.id, idea, projectDefinition },
+        input: { rawNotes: value }
+      });
+      const text = response.result?.notes || response.result?.summary;
+      if (text) setProjectNotes(text);
+      setNotesState({ status: 'done', error: '' });
+    } catch (err) {
+      setNotesState({ status: 'error', error: err.message });
+    }
+  };
+  return <section className="notebook-stage">
+    <StageIntro stageId="notes" title="Write down what you learned" subtitle="Notes are generated from the project state, then kept short and useful for revision, handoff, and presentation." />
+    {notesState.status === 'error' && <div className="build-result error" style={{ marginBottom: 12 }}><b>AI notes generation failed</b><span>{notesState.error}</span></div>}
+    <div className="card card-pad">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+        <label className="field-label" style={{ margin: 0 }}>Project notes</label>
+        <button className="notebook-btn sm ghost" onClick={generateNotes} disabled={notesState.status === 'running'}>{notesState.status === 'running' ? 'Writing with AI...' : 'Generate notes with AI'}</button>
+      </div>
+      <textarea className="notebook-textarea" style={{ minHeight: 390 }} value={value} onChange={(e) => setProjectNotes(e.target.value)} />
+    </div>
+    <StageActions><PrimaryButton onClick={() => setActiveStep('present')}>Continue to Presentation <ArrowRight size={15} /></PrimaryButton></StageActions>
+  </section>;
 };
 
 const PresentStage = () => {
