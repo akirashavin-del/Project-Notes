@@ -1,0 +1,590 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% ============================================================
+% MODERN 6-SLIDE PROJECT PRESENTATION TEMPLATE
+% Style: Minimal / Startup / Hackathon / Tech
+%
+% IMPORTANT:
+% Replace text marked with:
+% % TODO: ...
+% ============================================================
+
+% ---------- Packages ----------
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{amsmath}
+\usepackage{fontawesome5}
+
+% ---------- Colors ----------
+\definecolor{Navy}{RGB}{18,25,38}
+\definecolor{Blue}{RGB}{50,100,220}
+\definecolor{Purple}{RGB}{120,80,200}
+\definecolor{Green}{RGB}{50,160,120}
+\definecolor{Gray}{RGB}{100,105,115}
+\definecolor{LightGray}{RGB}{245,246,249}
+
+% ---------- General ----------
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+\setbeamercolor{normal text}{fg=Navy,bg=white}
+\setbeamercolor{frametitle}{fg=Navy}
+\setbeamercolor{structure}{fg=Blue}
+
+\setbeamertemplate{footline}{
+    \hfill
+    \scriptsize\color{Gray}
+    \insertframenumber
+    \hspace{0.5cm}
+    \vspace{0.2cm}
+}
+
+% ============================================================
+% PROJECT INFORMATION
+% ============================================================
+
+\title{PROJECT NAME}
+% TODO: Your project name
+
+\subtitle{One powerful sentence explaining the idea}
+% TODO: Example:
+% "AI-powered platform for early crop disease detection"
+
+\author{YOUR NAME \quad | \quad TEAM NAME}
+% TODO: Add your name and team name
+
+\institute{YOUR INSTITUTION}
+% TODO: College / company / organization
+
+\date{2026}
+% TODO: Event / competition / year
+
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+
+\begin{document}
+
+
+% ============================================================
+% SLIDE 1 — HERO
+% ============================================================
+
+\begin{frame}[plain]
+
+\vspace{1cm}
+
+{\small
+\color{Blue}
+YOUR CATEGORY / DOMAIN
+}
+
+\vspace{0.4cm}
+
+{\Huge
+\textbf{YOUR PROJECT}\\
+\textbf{NAME}
+}
+
+\vspace{0.5cm}
+
+{\Large
+% TODO: Write a short statement explaining
+% what your project does.
+One simple sentence describing your solution.
+}
+
+\vspace{0.8cm}
+
+\begin{tikzpicture}
+\node[
+    rounded corners=12pt,
+    fill=LightGray,
+    minimum width=12cm,
+    minimum height=2.2cm,
+    align=center
+] {
+    \Large
+    \textbf{PROBLEM}
+    \quad $\rightarrow$ \quad
+    \textbf{YOUR IDEA}
+    \quad $\rightarrow$ \quad
+    \textbf{IMPACT}
+};
+\end{tikzpicture}
+
+\vfill
+
+{\small
+% TODO: Team members / institution / event
+YOUR TEAM \quad • \quad YOUR INSTITUTION
+}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 2 — THE "WHY"
+% ============================================================
+
+\begin{frame}{Why does this matter?}
+
+\begin{columns}[T]
+
+\column{0.45\textwidth}
+
+{\Huge
+\textbf{The}\\
+\textbf{Problem}
+}
+
+\vspace{0.5cm}
+
+% TODO:
+% Explain the problem in 2–3 short sentences.
+% Avoid long paragraphs.
+
+{\large
+People currently face
+\textbf{[MAIN PROBLEM]}.
+This leads to
+\textbf{[MAIN CONSEQUENCE]}.
+}
+
+\vspace{0.5cm}
+
+{\color{Gray}
+% TODO: Add context.
+Existing solutions are limited by
+[limitation 1], [limitation 2].
+}
+
+
+\column{0.5\textwidth}
+
+% ---------- Big statistic ----------
+
+\begin{tikzpicture}
+
+\node[
+    rounded corners=15pt,
+    fill=LightGray,
+    minimum width=6cm,
+    minimum height=2.5cm,
+    align=center
+] {
+    {\Huge\textbf{XX\%}}\\[0.15cm]
+    {\small
+    % TODO: Important statistic
+    of users / cases are affected
+    }
+};
+
+\vspace{0.4cm}
+
+\node[
+    rounded corners=15pt,
+    fill=LightGray,
+    minimum width=6cm,
+    minimum height=2.5cm,
+    align=center
+] at (0,-3.2) {
+    {\Huge\textbf{XX}}\\[0.15cm]
+    {\small
+    % TODO: Another useful number
+    Cost / time / people / cases
+    }
+};
+
+\end{tikzpicture}
+
+\end{columns}
+
+\vfill
+
+\begin{center}
+\textbf{\color{Blue}
+% TODO: One strong takeaway
+"The real challenge is not X — it is Y."
+}
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 3 — THE IDEA
+% ============================================================
+
+\begin{frame}{The Idea}
+
+\begin{center}
+
+{\Huge
+\textbf{Simple idea. Real solution.}
+}
+
+\vspace{0.6cm}
+
+\begin{tikzpicture}[
+    box/.style={
+        rounded corners=12pt,
+        minimum width=3.2cm,
+        minimum height=2.3cm,
+        align=center,
+        fill=LightGray
+    },
+    arrow/.style={
+        ->,
+        line width=1.5pt,
+        color=Blue
+    }
+]
+
+\node[box] (one) {
+    {\Large\textbf{01}}\\
+    \vspace{0.1cm}
+    \textbf{INPUT}\\
+    \scriptsize
+    % TODO: What enters?
+    User / Data
+};
+
+\node[box, right=1cm of one] (two) {
+    {\Large\textbf{02}}\\
+    \vspace{0.1cm}
+    \textbf{PROCESS}\\
+    \scriptsize
+    % TODO: What happens?
+    AI / Algorithm
+};
+
+\node[box, right=1cm of two] (three) {
+    {\Large\textbf{03}}\\
+    \vspace{0.1cm}
+    \textbf{OUTPUT}\\
+    \scriptsize
+    % TODO: What comes out?
+    Useful Result
+};
+
+\draw[arrow] (one) -- (two);
+\draw[arrow] (two) -- (three);
+
+\end{tikzpicture}
+
+\vspace{0.8cm}
+
+% TODO:
+% Replace this with your actual process.
+% Example:
+% Farmer → Crop Photo → AI Vision → Disease Detection → Treatment Advice
+
+\begin{block}{Our Core Innovation}
+\centering
+% TODO: Describe what is NEW about your project.
+\textbf{[YOUR UNIQUE IDEA IN ONE SENTENCE]}
+\end{block}
+
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 4 — TECHNOLOGY
+% ============================================================
+
+\begin{frame}{Under the Hood}
+
+\begin{columns}[T]
+
+\column{0.60\textwidth}
+
+{\Large
+\textbf{System Architecture}
+}
+
+\vspace{0.4cm}
+
+\begin{tikzpicture}[
+    node distance=0.5cm,
+    layer/.style={
+        rounded corners=8pt,
+        draw=Blue,
+        minimum width=7cm,
+        minimum height=0.8cm,
+        align=center
+    }
+]
+
+\node[layer] (user) {
+    \textbf{User / Data Source}
+};
+
+\node[layer, below=of user] (frontend) {
+    \textbf{Frontend / Application}
+};
+
+\node[layer, below=of frontend] (backend) {
+    \textbf{Backend / Processing}
+};
+
+\node[layer, below=of backend] (ai) {
+    \textbf{AI / ML / Core Algorithm}
+};
+
+\node[layer, below=of ai] (result) {
+    \textbf{Result / Recommendation}
+};
+
+\draw[->, thick] (user) -- (frontend);
+\draw[->, thick] (frontend) -- (backend);
+\draw[->, thick] (backend) -- (ai);
+\draw[->, thick] (ai) -- (result);
+
+\end{tikzpicture}
+
+% TODO:
+% Replace these layers with your actual architecture.
+
+
+\column{0.35\textwidth}
+
+{\Large
+\textbf{Tech Stack}
+}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+
+\item \textbf{Frontend}\\
+% TODO: Flutter / React / HTML etc.
+
+\item \textbf{Backend}\\
+% TODO: Node.js / FastAPI / Firebase etc.
+
+\item \textbf{AI / ML}\\
+% TODO: Model / algorithm
+
+\item \textbf{Database}\\
+% TODO: PostgreSQL / Firebase / MongoDB
+
+\item \textbf{Deployment}\\
+% TODO: AWS / Render / Firebase etc.
+
+\end{itemize}
+
+\vspace{0.3cm}
+
+{\small\color{Gray}
+% TODO:
+Mention one technically important feature.
+Example: "Designed for real-time inference."
+}
+
+\end{columns}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 5 — PROOF
+% ============================================================
+
+\begin{frame}{Does it work?}
+
+\begin{center}
+
+{\Huge
+\textbf{Results}
+}
+
+\vspace{0.5cm}
+
+\begin{columns}
+
+\column{0.30\textwidth}
+
+{\Huge\textbf{XX\%}}
+
+\vspace{0.2cm}
+
+{\small
+% TODO: Main performance metric
+Accuracy / Improvement
+}
+
+
+\column{0.30\textwidth}
+
+{\Huge\textbf{XX}}
+
+\vspace{0.2cm}
+
+{\small
+% TODO: Second metric
+Users / Cases / Dataset size
+}
+
+
+\column{0.30\textwidth}
+
+{\Huge\textbf{XX×}}
+
+\vspace{0.2cm}
+
+{\small
+% TODO: Third metric
+Speed / Efficiency / Cost reduction
+}
+
+\end{columns}
+
+\vspace{0.7cm}
+
+% ---------- Comparison ----------
+\begin{tikzpicture}
+
+\node[
+    rounded corners=10pt,
+    fill=LightGray,
+    minimum width=11cm,
+    minimum height=2.2cm,
+    align=center
+] {
+    \textbf{Existing Approach}
+    \hspace{2cm}
+    $\longrightarrow$
+    \hspace{2cm}
+    \textbf{Our Approach}\\[0.3cm]
+
+    % TODO:
+    % Replace with actual comparison.
+    XX
+    \hspace{3.4cm}
+    \textbf{XX}
+};
+
+\end{tikzpicture}
+
+\vspace{0.5cm}
+
+{\color{Blue}
+\textbf{
+% TODO: Your strongest result
+"XX\% improvement over the baseline."
+}
+}
+
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 6 — IMPACT / FUTURE
+% ============================================================
+
+\begin{frame}[plain]
+
+\vspace{0.7cm}
+
+{\Huge
+\textbf{What happens next?}
+}
+
+\vspace{0.5cm}
+
+\begin{columns}[T]
+
+\column{0.30\textwidth}
+
+{\Large\color{Blue}
+\textbf{01}\\
+Impact
+}
+
+\vspace{0.2cm}
+
+% TODO:
+% Who benefits?
+% What real-world problem is reduced?
+
+{\small
+[Real-world benefit]
+}
+
+\column{0.30\textwidth}
+
+{\Large\color{Purple}
+\textbf{02}\\
+Scale
+}
+
+\vspace{0.2cm}
+
+% TODO:
+% How can this reach more users?
+% What can be expanded?
+
+{\small
+[Scalability opportunity]
+}
+
+\column{0.30\textwidth}
+
+{\Large\color{Green}
+\textbf{03}\\
+Future
+}
+
+\vspace{0.2cm}
+
+% TODO:
+% What will you build next?
+
+{\small
+[Next development]
+}
+
+\end{columns}
+
+\vspace{0.8cm}
+
+\begin{tikzpicture}
+
+\node[
+    rounded corners=15pt,
+    fill=Navy,
+    text=white,
+    minimum width=12cm,
+    minimum height=2.2cm,
+    align=center
+] {
+    {\Large\textbf{
+    % TODO: Final message
+    "Our goal is to make [X] simpler, faster and more accessible."
+    }}
+};
+
+\end{tikzpicture}
+
+\vfill
+
+\begin{center}
+{\Large\textbf{Thank You}}\\
+\vspace{0.2cm}
+{\small
+% TODO: GitHub / website / QR code / contact
+YOUR NAME \quad • \quad YOUR TEAM
+}
+\end{center}
+
+\end{frame}
+
+
+\end{document}

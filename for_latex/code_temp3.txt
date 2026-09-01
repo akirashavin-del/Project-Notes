@@ -1,0 +1,796 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% ============================================================
+% UNIVERSAL 6-SLIDE PROJECT TEMPLATE — STYLE 3
+% Dark / Premium / Research / Competition
+%
+% Works for:
+% AI • ML • Software • Hardware • Research • IoT
+% Healthcare • Agriculture • Social Impact • Hackathons
+%
+% Anything marked TODO is a prompt for what to fill.
+% ============================================================
+
+% ------------------------------------------------------------
+% PACKAGES
+% ------------------------------------------------------------
+
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{xcolor}
+\usepackage{booktabs}
+
+\usetikzlibrary{positioning,arrows.meta,shapes.geometric}
+
+% ------------------------------------------------------------
+% COLORS
+% ------------------------------------------------------------
+
+\definecolor{BG}{RGB}{13,17,23}
+\definecolor{White}{RGB}{245,247,250}
+\definecolor{Muted}{RGB}{160,170,185}
+\definecolor{Accent}{RGB}{90,180,255}
+\definecolor{Card}{RGB}{25,31,41}
+\definecolor{Green}{RGB}{80,200,150}
+
+% ------------------------------------------------------------
+% BEAMER SETTINGS
+% ------------------------------------------------------------
+
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamercolor{background canvas}{bg=BG}
+\setbeamercolor{normal text}{fg=White,bg=BG}
+\setbeamercolor{frametitle}{fg=White,bg=BG}
+\setbeamercolor{structure}{fg=Accent}
+
+\setbeamertemplate{footline}{
+    \hfill
+    \color{Muted}
+    \scriptsize
+    \insertframenumber{} / \inserttotalframenumber
+    \hspace{0.5cm}
+    \vspace{0.25cm}
+}
+
+\setbeamertemplate{itemize item}{
+    \color{Accent}$\bullet$
+}
+
+% ------------------------------------------------------------
+% PROJECT INFORMATION
+% ------------------------------------------------------------
+
+\title{PROJECT NAME}
+
+% TODO:
+% Write the project name.
+% Keep it short if possible.
+
+\subtitle{SHORT PROJECT DESCRIPTION}
+
+% TODO:
+% Explain your project in one sentence.
+
+\author{YOUR NAME \quad | \quad TEAM NAME}
+
+% TODO:
+% Add team members / team name.
+
+\institute{YOUR INSTITUTION}
+
+% TODO:
+% College / University / Company / Organization.
+
+\date{2026}
+
+% TODO:
+% Competition / Conference / Presentation date.
+
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+
+\begin{document}
+
+
+% ============================================================
+% SLIDE 1
+% HERO / TITLE
+% ============================================================
+
+\begin{frame}[plain]
+
+\vspace{1.2cm}
+
+{\small
+\color{Accent}
+YOUR DOMAIN  \quad / \quad 2026
+}
+
+\vspace{0.5cm}
+
+{\Huge
+\textbf{YOUR PROJECT}\\
+\textbf{TITLE}
+}
+
+\vspace{0.5cm}
+
+{\Large
+\color{Muted}
+% TODO:
+% Write ONE sentence describing your project.
+% Example:
+% "An AI system for early crop disease detection."
+YOUR ONE-LINE PROJECT DESCRIPTION
+}
+
+\vspace{1cm}
+
+\begin{tikzpicture}
+
+\node[
+    rounded corners=12pt,
+    fill=Card,
+    minimum width=12cm,
+    minimum height=2.4cm,
+    align=center
+] {
+
+    \color{Muted}
+    PROBLEM
+    \hspace{1cm}
+    {\color{Accent}$\longrightarrow$}
+    \hspace{1cm}
+    \color{White}
+    \textbf{SOLUTION}
+    \hspace{1cm}
+    {\color{Accent}$\longrightarrow$}
+    \hspace{1cm}
+    \color{Green}
+    IMPACT
+
+};
+
+\end{tikzpicture}
+
+\vfill
+
+{\small
+\color{Muted}
+YOUR NAME \quad • \quad YOUR INSTITUTION
+}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 2
+% THE PROBLEM
+% ============================================================
+
+\begin{frame}{01 \quad The Problem}
+
+{\Huge
+\textbf{What needs to change?}
+}
+
+\vspace{0.5cm}
+
+\begin{columns}[T]
+
+% ------------------------------------------------------------
+% LEFT
+% ------------------------------------------------------------
+
+\column{0.55\textwidth}
+
+{\large
+% TODO:
+% Explain the problem in 2–3 sentences.
+%
+% Keep this simple:
+% WHO + WHAT + WHY
+}
+
+\textbf{[TARGET USER]}
+faces
+
+\textbf{\color{Accent}[MAIN PROBLEM]}
+
+which results in
+
+\textbf{[MAIN CONSEQUENCE].}
+
+\vspace{0.5cm}
+
+\begin{itemize}
+
+    \item
+    % TODO:
+    % Pain point 1
+    Existing process is [slow / expensive / difficult]
+
+    \item
+    % TODO:
+    % Pain point 2
+    Current solutions cannot [do X]
+
+    \item
+    % TODO:
+    % Pain point 3
+    This affects [people / industry / environment]
+
+\end{itemize}
+
+
+% ------------------------------------------------------------
+% RIGHT
+% ------------------------------------------------------------
+
+\column{0.38\textwidth}
+
+\begin{tikzpicture}
+
+\node[
+    rounded corners=15pt,
+    fill=Card,
+    minimum width=4.5cm,
+    minimum height=4.2cm,
+    align=center
+] {
+
+    {\Huge\color{Accent}\textbf{XX\%}}\\[0.2cm]
+
+    {\small
+    % TODO:
+    % Add your strongest statistic.
+    people / cases / systems affected
+    }
+
+    \vspace{0.4cm}
+
+    {\Large\color{White}
+    \textbf{WHY NOW?}
+    }
+
+    \\[0.15cm]
+
+    {\small\color{Muted}
+    % TODO:
+    % Why is solving this problem
+    % important today?
+    Your key reason
+    }
+
+};
+
+\end{tikzpicture}
+
+\end{columns}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 3
+% THE SOLUTION
+% ============================================================
+
+\begin{frame}{02 \quad The Solution}
+
+{\Huge
+\textbf{Our approach}
+}
+
+\vspace{0.3cm}
+
+{\color{Muted}
+% TODO:
+% Explain your idea in one sentence.
+A simple system designed to solve the problem at its source.
+}
+
+\vspace{0.7cm}
+
+\begin{tikzpicture}[
+    box/.style={
+        rounded corners=12pt,
+        fill=Card,
+        minimum width=3.3cm,
+        minimum height=2.3cm,
+        align=center
+    },
+    arrow/.style={
+        -{Latex},
+        line width=1.5pt,
+        color=Accent
+    }
+]
+
+\node[box] (input) {
+
+    {\Large\color{Accent}\textbf{01}}\\[0.2cm]
+
+    \textbf{INPUT}\\
+
+    {\small
+    % TODO:
+    % What does the user/system provide?
+    Data / Image / Sensor / Query
+    }
+
+};
+
+\node[box, right=1cm of input] (core) {
+
+    {\Large\color{Accent}\textbf{02}}\\[0.2cm]
+
+    \textbf{CORE}\\
+
+    {\small
+    % TODO:
+    % Main algorithm / AI / processing
+    AI / Algorithm
+    }
+
+};
+
+\node[box, right=1cm of core] (output) {
+
+    {\Large\color{Green}\textbf{03}}\\[0.2cm]
+
+    \textbf{OUTPUT}\\
+
+    {\small
+    % TODO:
+    % What useful result is produced?
+    Prediction / Action / Recommendation
+    }
+
+};
+
+\draw[arrow] (input) -- (core);
+\draw[arrow] (core) -- (output);
+
+\end{tikzpicture}
+
+\vspace{0.8cm}
+
+\begin{center}
+
+{\large
+\textbf{\color{Accent}
+% TODO:
+% State your innovation.
+What makes this solution different?
+}
+}
+
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 4
+% TECHNOLOGY / ARCHITECTURE
+% ============================================================
+
+\begin{frame}{03 \quad Technology}
+
+{\Huge
+\textbf{How it works}
+}
+
+\vspace{0.4cm}
+
+\begin{columns}[T]
+
+% ------------------------------------------------------------
+% ARCHITECTURE
+% ------------------------------------------------------------
+
+\column{0.62\textwidth}
+
+\begin{tikzpicture}[
+    node distance=0.35cm,
+    layer/.style={
+        rounded corners=8pt,
+        fill=Card,
+        minimum width=7.2cm,
+        minimum height=0.72cm,
+        align=center
+    },
+    arrow/.style={
+        -{Latex},
+        color=Accent,
+        thick
+    }
+]
+
+\node[layer] (a) {
+    \textbf{USER / DATA SOURCE}
+};
+
+\node[layer, below=of a] (b) {
+    \textbf{APPLICATION / FRONTEND}
+};
+
+\node[layer, below=of b] (c) {
+    \textbf{BACKEND / PROCESSING}
+};
+
+\node[layer, below=of c] (d) {
+    \textbf{AI / ML / CORE ALGORITHM}
+};
+
+\node[layer, below=of d] (e) {
+    \textbf{RESULT / ACTION}
+};
+
+\draw[arrow] (a) -- (b);
+\draw[arrow] (b) -- (c);
+\draw[arrow] (c) -- (d);
+\draw[arrow] (d) -- (e);
+
+\end{tikzpicture}
+
+% TODO:
+% Replace the architecture with your actual architecture.
+%
+% Example:
+%
+% Farmer
+%   ↓
+% Flutter App
+%   ↓
+% FastAPI
+%   ↓
+% CNN + Gemini
+%   ↓
+% Disease + Treatment
+
+
+% ------------------------------------------------------------
+% TECH STACK
+% ------------------------------------------------------------
+
+\column{0.33\textwidth}
+
+{\large
+\textbf{\color{Accent}TECH STACK}
+}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+
+\item
+\textbf{Frontend}\\
+{\small
+% TODO:
+Flutter / React / Web
+}
+
+\item
+\textbf{Backend}\\
+{\small
+% TODO:
+FastAPI / Node.js / Firebase
+}
+
+\item
+\textbf{AI / ML}\\
+{\small
+% TODO:
+CNN / LLM / Transformer / Algorithm
+}
+
+\item
+\textbf{Database}\\
+{\small
+% TODO:
+PostgreSQL / MongoDB / Firebase
+}
+
+\item
+\textbf{Deployment}\\
+{\small
+% TODO:
+AWS / Render / Firebase / GCP
+}
+
+\end{itemize}
+
+\end{columns}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 5
+% RESULTS
+% ============================================================
+
+\begin{frame}{04 \quad Evidence}
+
+{\Huge
+\textbf{Does it work?}
+}
+
+\vspace{0.5cm}
+
+\begin{columns}
+
+% ------------------------------------------------------------
+% METRIC 1
+% ------------------------------------------------------------
+
+\column{0.30\textwidth}
+
+\begin{center}
+
+{\Huge
+\color{Accent}
+\textbf{XX\%}
+}
+
+\vspace{0.2cm}
+
+{\small
+% TODO:
+Main accuracy / improvement / success rate
+}
+
+\end{center}
+
+
+% ------------------------------------------------------------
+% METRIC 2
+% ------------------------------------------------------------
+
+\column{0.30\textwidth}
+
+\begin{center}
+
+{\Huge
+\color{Green}
+\textbf{XX}
+}
+
+\vspace{0.2cm}
+
+{\small
+% TODO:
+Dataset size / users / test cases
+}
+
+\end{center}
+
+
+% ------------------------------------------------------------
+% METRIC 3
+% ------------------------------------------------------------
+
+\column{0.30\textwidth}
+
+\begin{center}
+
+{\Huge
+\color{Accent}
+\textbf{XX$\times$}
+}
+
+\vspace{0.2cm}
+
+{\small
+% TODO:
+Speed / efficiency / cost improvement
+}
+
+\end{center}
+
+\end{columns}
+
+\vspace{0.7cm}
+
+% ------------------------------------------------------------
+% COMPARISON
+% ------------------------------------------------------------
+
+\begin{tikzpicture}
+
+\node[
+    rounded corners=12pt,
+    fill=Card,
+    minimum width=12cm,
+    minimum height=2.3cm,
+    align=center
+] {
+
+    \textbf{BASELINE}
+    \hspace{2cm}
+    {\color{Muted}$\longrightarrow$}
+    \hspace{2cm}
+    \textbf{\color{Accent}OUR APPROACH}
+
+    \\[0.4cm]
+
+    % TODO:
+    % Put actual comparison here.
+    XX
+    \hspace{4cm}
+    \textbf{\color{Green}XX}
+
+};
+
+\end{tikzpicture}
+
+\vspace{0.5cm}
+
+\begin{center}
+
+{\large
+\color{Green}
+\textbf{
+% TODO:
+% Give your strongest evidence.
+Example: 18\% better performance than the baseline.
+}
+}
+
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 6
+% IMPACT + FUTURE
+% ============================================================
+
+\begin{frame}{05 \quad The Bigger Picture}
+
+{\Huge
+\textbf{From prototype to impact}
+}
+
+\vspace{0.6cm}
+
+\begin{columns}[T]
+
+% ------------------------------------------------------------
+% IMPACT
+% ------------------------------------------------------------
+
+\column{0.30\textwidth}
+
+{\Large
+\color{Accent}
+\textbf{IMPACT}
+}
+
+\vspace{0.25cm}
+
+% TODO:
+% Who benefits from this project?
+
+{\small
+\textbf{Users}\\
+[Who benefits?]
+
+\vspace{0.3cm}
+
+\textbf{Society}\\
+[Social benefit]
+
+\vspace{0.3cm}
+
+\textbf{Industry}\\
+[Economic / technical benefit]
+}
+
+
+% ------------------------------------------------------------
+% SCALE
+% ------------------------------------------------------------
+
+\column{0.30\textwidth}
+
+{\Large
+\color{Green}
+\textbf{SCALE}
+}
+
+\vspace{0.25cm}
+
+% TODO:
+% Explain how the project can grow.
+
+{\small
+\textbf{Today}\\
+[Current prototype]
+
+\vspace{0.3cm}
+
+$\downarrow$
+
+\vspace{0.3cm}
+
+\textbf{Tomorrow}\\
+[Deployment]
+
+\vspace{0.3cm}
+
+$\downarrow$
+
+\vspace{0.3cm}
+
+\textbf{Future}\\
+[Large-scale vision]
+}
+
+
+% ------------------------------------------------------------
+% FUTURE
+% ------------------------------------------------------------
+
+\column{0.30\textwidth}
+
+{\Large
+\color{Accent}
+\textbf{NEXT}
+}
+
+\vspace{0.25cm}
+
+\begin{itemize}
+
+\item
+% TODO:
+Future improvement 1
+
+\item
+% TODO:
+Future improvement 2
+
+\item
+% TODO:
+Real-world validation
+
+\item
+% TODO:
+Scale / deployment
+
+\end{itemize}
+
+\end{columns}
+
+\vfill
+
+\begin{center}
+
+{\Large
+\textbf{
+% TODO:
+% Final memorable statement.
+"Technology should solve the problem, not complicate it."
+}
+}
+
+\vspace{0.3cm}
+
+{\small\color{Muted}
+THANK YOU \quad • \quad YOUR TEAM \quad • \quad YOUR CONTACT
+}
+
+\end{center}
+
+\end{frame}
+
+
+\end{document}

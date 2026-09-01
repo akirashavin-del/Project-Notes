@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title><!-- PROMPT: Replace with your name/brand --> Portfolio</title>
+
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     PROMPT: This template is a bold, editorial portfolio/gallery
+     layout — big type, asymmetric grid, no navbar+hero, no
+     sidebar. Good for personal sites, agencies, case-study pages,
+     galleries. Replace tokens to match your brand.
+  ============================================================ */
+  :root {
+    --color-bg: #fbfaf7;
+    --color-ink: #14161a;         /* near-black text */
+    --color-muted: #5c5f66;
+    --color-accent: #ff5a36;      /* one loud accent color, used sparingly */
+    --color-accent-soft: #ffe3da;
+    --color-line: #d8d6d0;
+    --color-card: #ffffff;
+
+    --font-display: "Georgia", "Times New Roman", serif; /* big editorial headlines */
+    --font-body: "Helvetica Neue", Arial, sans-serif;     /* everything else */
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 28px;
+    --space-5: 48px;
+    --space-6: 88px;
+
+    --radius: 4px; /* kept small/sharp on purpose — editorial, not soft */
+    --max-width: 1200px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.05; }
+  p { margin: 0; color: var(--color-muted); }
+  a { color: inherit; text-decoration: none; }
+  img { max-width: 100%; display: block; }
+
+  .container { max-width: var(--max-width); margin: 0 auto; padding: 0 var(--space-4); }
+
+  /* ============================================================
+     MASTHEAD
+     PROMPT: Replace name + tagline. This is intentionally not a
+     traditional navbar — it reads like a magazine masthead.
+     Keep nav links minimal (3-4 max).
+  ============================================================ */
+  .masthead {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: var(--space-4) var(--space-4) var(--space-3);
+    border-bottom: 2px solid var(--color-ink);
+  }
+  .masthead .name {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+  .masthead nav { display: flex; gap: var(--space-4); }
+  .masthead nav a {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .masthead nav a:hover { color: var(--color-accent); }
+
+  /* ============================================================
+     INTRO / STATEMENT
+     PROMPT: This replaces a typical hero — one large, confident
+     statement of what you do or who you are. Keep it to 1-2 lines
+     of big type; resist the urge to add a CTA button here.
+  ============================================================ */
+  .statement {
+    padding: var(--space-6) var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .statement h1 {
+    font-size: clamp(2.25rem, 6vw, 4.5rem);
+    max-width: 900px;
+  }
+  .statement h1 .accent { color: var(--color-accent); font-style: italic; }
+  .statement .meta {
+    display: flex;
+    gap: var(--space-5);
+    margin-top: var(--space-4);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+
+  /* ============================================================
+     WORK / PROJECT GRID
+     PROMPT: This is an asymmetric grid — the first item is
+     larger (featured), the rest are equal-sized. Replace with
+     your real projects/posts/case studies. Add more .grid-item
+     blocks as needed; the CSS grid will wrap them automatically.
+  ============================================================ */
+  .work {
+    padding: var(--space-5) var(--space-4);
+  }
+  .work-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: var(--space-4);
+  }
+  .work-header .index {
+    font-family: var(--font-mono, monospace);
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+  .work-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--space-3);
+  }
+  .grid-item {
+    background: var(--color-card);
+    border: 1px solid var(--color-line);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s ease;
+  }
+  .grid-item:hover { transform: translateY(-3px); }
+  .grid-item.featured { grid-column: span 4; }
+  .grid-item:not(.featured) { grid-column: span 2; }
+  .grid-item .thumb {
+    aspect-ratio: 4 / 3;
+    background: var(--color-accent-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 0.9rem;
+  }
+  .grid-item .info { padding: var(--space-3); }
+  .grid-item .info .tag {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-accent);
+    margin-bottom: var(--space-1);
+    display: block;
+  }
+  .grid-item .info h3 { font-size: 1.1rem; margin-bottom: var(--space-1); }
+  .grid-item .info p { font-size: 0.85rem; }
+
+  @media (max-width: 900px) {
+    .work-grid { grid-template-columns: repeat(2, 1fr); }
+    .grid-item.featured,
+    .grid-item:not(.featured) { grid-column: span 2; }
+  }
+
+  /* ============================================================
+     PULL QUOTE / TESTIMONIAL
+     PROMPT: Optional break in rhythm — a client quote, a piece of
+     press, or a personal statement. Delete if not needed.
+  ============================================================ */
+  .pull-quote {
+    padding: var(--space-6) var(--space-4);
+    border-top: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-line);
+    text-align: center;
+  }
+  .pull-quote blockquote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+    max-width: 800px;
+    margin: 0 auto var(--space-3);
+    color: var(--color-ink);
+  }
+  .pull-quote cite {
+    font-style: normal;
+    font-size: 0.85rem;
+    color: var(--color-muted);
+  }
+
+  /* ============================================================
+     ABOUT / BIO STRIP
+     PROMPT: Short bio + skills or focus areas. Replace copy and
+     tag list with your real background.
+  ============================================================ */
+  .about {
+    padding: var(--space-5) var(--space-4);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+  }
+  .about p { color: var(--color-ink); font-size: 1.05rem; }
+  .about .tags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+  .about .tag-pill {
+    border: 1px solid var(--color-ink);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+  }
+  @media (max-width: 768px) { .about { grid-template-columns: 1fr; } }
+
+  /* ============================================================
+     CONTACT STRIP
+     PROMPT: Simple, low-friction contact — a mailto link styled
+     big, not a full form. Swap for a form if you need structured
+     submissions instead.
+  ============================================================ */
+  .contact-strip {
+    padding: var(--space-6) var(--space-4);
+    background: var(--color-ink);
+    color: var(--color-bg);
+    text-align: center;
+  }
+  .contact-strip p { color: var(--color-line); margin-bottom: var(--space-3); }
+  .contact-strip a.email {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 5vw, 3rem);
+    border-bottom: 2px solid var(--color-accent);
+  }
+  .contact-strip a.email:hover { color: var(--color-accent); }
+
+  /* ============================================================
+     FOOTER
+     PROMPT: Minimal — social links + year. Replace with your
+     real handles/links.
+  ============================================================ */
+  .footer {
+    padding: var(--space-4);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--color-muted);
+  }
+  .footer .socials { display: flex; gap: var(--space-3); }
+  .footer .socials a:hover { color: var(--color-accent); }
+
+  a:focus-visible, button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       MASTHEAD
+       PROMPT: Replace name + nav links.
+  ============================================================ -->
+  <header class="masthead container">
+    <div class="name">Your Name</div>
+    <nav>
+      <a href="#work">Work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <!-- ============================================================
+       STATEMENT
+       PROMPT: One confident sentence about what you do. The
+       .accent span is for one italicized/colored word — use it
+       sparingly, not on every noun.
+  ============================================================ -->
+  <section class="statement container">
+    <h1>I design and build things that make <span class="accent">complex ideas</span> feel simple.</h1>
+    <div class="meta">
+      <span><!-- PROMPT: role/title --> Product Designer</span>
+      <span><!-- PROMPT: location --> Based in your city</span>
+      <span><!-- PROMPT: availability --> Available for select projects</span>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       WORK GRID
+       PROMPT: Replace the featured item and the smaller items
+       with your real projects. Keep the first item as .featured
+       for visual hierarchy, or remove that class to make all
+       items equal size.
+  ============================================================ -->
+  <section class="work container" id="work">
+    <div class="work-header">
+      <h2 style="font-size:1.3rem;">Selected Work</h2>
+      <span class="index">01 — 04</span>
+    </div>
+    <div class="work-grid">
+      <div class="grid-item featured">
+        <div class="thumb">Project Image</div>
+        <div class="info">
+          <span class="tag">Case Study</span>
+          <h3>Featured Project Title</h3>
+          <p>One sentence describing the problem and what you built to solve it.</p>
+        </div>
+      </div>
+      <div class="grid-item">
+        <div class="thumb">Project Image</div>
+        <div class="info">
+          <span class="tag">Web</span>
+          <h3>Project Two</h3>
+          <p>Short one-line description.</p>
+        </div>
+      </div>
+      <div class="grid-item">
+        <div class="thumb">Project Image</div>
+        <div class="info">
+          <span class="tag">Branding</span>
+          <h3>Project Three</h3>
+          <p>Short one-line description.</p>
+        </div>
+      </div>
+      <div class="grid-item">
+        <div class="thumb">Project Image</div>
+        <div class="info">
+          <span class="tag">Mobile</span>
+          <h3>Project Four</h3>
+          <p>Short one-line description.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PULL QUOTE (optional)
+       PROMPT: Replace with a real quote/testimonial, or delete
+       this whole <section>.
+  ============================================================ -->
+  <section class="pull-quote">
+    <blockquote>"One strong sentence someone said about working with you — kept short enough to read at a glance."</blockquote>
+    <cite>— Name, Role at Company</cite>
+  </section>
+
+  <!-- ============================================================
+       ABOUT
+       PROMPT: Replace bio paragraph and tag list with your real
+       background/focus areas.
+  ============================================================ -->
+  <section class="about container" id="about">
+    <div>
+      <h2 style="font-size:1.3rem; margin-bottom: var(--space-2);">About</h2>
+    </div>
+    <div>
+      <p>Two or three sentences about your background, approach, and what kind of work you take on. Write it in your own voice, not a resume summary.</p>
+      <div class="tags">
+        <span class="tag-pill">Skill One</span>
+        <span class="tag-pill">Skill Two</span>
+        <span class="tag-pill">Skill Three</span>
+        <span class="tag-pill">Skill Four</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONTACT
+       PROMPT: Replace email address. This is deliberately just a
+       mailto link, not a form — swap for a <form> block like in
+       the other templates if you need structured submissions.
+  ============================================================ -->
+  <section class="contact-strip" id="contact">
+    <p>Have a project in mind?</p>
+    <a class="email" href="mailto:you@example.com">you@example.com</a>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       PROMPT: Replace social links and handles.
+  ============================================================ -->
+  <footer class="footer container">
+    <span>&copy; <span id="year"></span> Your Name</span>
+    <div class="socials">
+      <a href="#">Twitter</a>
+      <a href="#">Instagram</a>
+      <a href="#">LinkedIn</a>
+    </div>
+  </footer>
+
+  <script>
+    // PROMPT: keep as-is, keeps footer year current
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+
+</body>
+</html>

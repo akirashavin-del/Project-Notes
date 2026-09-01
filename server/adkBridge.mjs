@@ -1,3 +1,53 @@
+import { readFileSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+
+const readTemplate = (filename, secondary = '') => {
+  try {
+    const paths = [
+      join(process.cwd(), filename),
+      join(process.cwd(), 'server', filename)
+    ];
+    if (secondary) {
+      paths.push(join(process.cwd(), secondary));
+      paths.push(join(process.cwd(), 'server', secondary));
+    }
+    for (const p of paths) {
+      if (existsSync(p)) return readFileSync(p, 'utf8');
+    }
+  } catch (e) {
+    console.error(`Failed to read template ${filename}`, e);
+  }
+  return '';
+};
+
+const codeTemplateContent = readTemplate('code_development_prompt.txt');
+
+// Load all 3 LaTeX templates
+const latexTemplateContent1 = readTemplate('for_latex/code_temp1.txt', 'code_temp1.txt');
+const latexTemplateContent2 = readTemplate('for_latex/code_temp2.txt', 'code_temp2.txt');
+const latexTemplateContent3 = readTemplate('for_latex/code_temp3.txt', 'code_temp3.txt');
+const allLatexTemplates = `
+[LaTeX Style Option 1]:
+${latexTemplateContent1}
+[LaTeX Style Option 2]:
+${latexTemplateContent2}
+[LaTeX Style Option 3]:
+${latexTemplateContent3}
+`;
+
+// Load all 3 UI templates
+const uiTemplateContent1 = readTemplate('for_ui/ui-template1.html', 'ui-template1.html');
+const uiTemplateContent2 = readTemplate('for_ui/ui-template2.html', 'ui-template2.html');
+const uiTemplateContent3 = readTemplate('for_ui/ui-template3.html', 'ui-template3.html');
+const allUiTemplates = `
+[UI Style Option 1]:
+${uiTemplateContent1}
+[UI Style Option 2]:
+${uiTemplateContent2}
+[UI Style Option 3]:
+${uiTemplateContent3}
+`;
+
 const stripJsonFence = (value) => value.replace(/^```json\s*/i, '').replace(/```\s*$/i, '').trim();
 
 const parseAgentJson = (value) => {
@@ -26,7 +76,12 @@ async function remoteRequest(path, options = {}, timeoutMs = 60000) {
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${baseUrl}${path}`, { ...options, signal: controller.signal, headers: { ...(await remoteHeaders(controller.signal)), ...(options.headers || {}) } });
-    const body = await response.json().catch(() => null);
+    const raw = await response.text();
+    let body = null;
+    try { body = raw ? JSON.parse(raw) : null; } catch {
+      const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+      body = lines.length > 1 ? lines.map((line) => { try { return JSON.parse(line); } catch { return { text: line }; } }) : raw;
+    }
     if (!response.ok) throw new Error(body?.detail || body?.message || `Remote ADK request failed (${response.status}).`);
     return body;
   } catch (error) {
@@ -51,19 +106,37 @@ async function runRemoteADK({ task, input, project }, timeoutMs) {
     method: 'POST',
     body: JSON.stringify({ appName, userId, sessionId, newMessage: { role: 'user', parts: [{ text: JSON.stringify({ task, project, input }) }] } }),
   }, timeoutMs);
-  const finalText = [...(Array.isArray(events) ? events : [])].reverse().flatMap((event) => event.content?.parts || []).map((part) => part.text || '').find(Boolean);
+  const directResult = events?.result || events?.data;
+  if (directResult && typeof directResult === 'object' && (directResult.screens || directResult.files || directResult.notes)) return directResult;
+  const eventList = Array.isArray(events) ? events : Array.isArray(events?.events) ? events.events : [];
+  const finalText = [...eventList].reverse()
+    .flatMap((event) => event.content?.parts || event.parts || event.output?.parts || [])
+    .map((part) => part.text || '')
+    .find(Boolean);
   if (!finalText) throw new Error('Remote ADK returned no final response.');
   try { return parseAgentJson(finalText); } catch { throw new Error('Remote ADK returned text outside the required JSON shape.'); }
 }
 
-async function runDirectGemini({ task, input, project }, timeoutMs) {
-  const apiKey = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
+async function runDirectGemini({ task, input, project, key }, timeoutMs) {
+  const apiKey = key || process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error('Gemini API key is not configured. Add GOOGLE_API_KEY or GEMINI_API_KEY to .env.local or server environment.');
   const model = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
   const taskRule = task === 'generate_code'
-    ? 'Return exactly {"files":[{"path":"src/main.py","language":"python","role":"entry","content":"..."}]} with 2-5 small, relevant, runnable files. Use the requested language, keep dependencies standard-library only, and never invent APIs, citations, metrics, or project requirements.'
+    ? `Follow this full-stack project development prompt template:
+${codeTemplateContent}
+Guidelines:
+1. Generate a complete, functional, runnable backend (e.g. Node/Express or FastAPI) and matching React/Vite frontend.
+2. The generated code MUST produce a clear visual output (e.g., SVG diagrams, canvas graphics, or dynamic HTML visualization).
+3. Do NOT use fake placeholders or unimplemented button hooks. All logic must be real.
+4. Output JSON format: {"files":[{"path":"server.js","language":"javascript","role":"backend","content":"..."},{"path":"index.html","language":"html","role":"frontend","content":"..."}]}`
     : task === 'generate_ui'
-      ? 'Return exactly {"title":"...","screens":[{"name":"...","purpose":"...","fields":["..."],"actions":["..."]}],"flow":["..."]}. Keep it practical, accessible, and grounded in the supplied project.'
+      ? `Design a clean, modern interface plan. You can use one of these three template options depending on what fits best:
+${allUiTemplates}
+Guidelines:
+1. Ensure the UI displays and uses the actual visual output generated by the backend/frontend code (e.g., interactive canvas, charts, or SVG grids).
+2. Do NOT include any features, fields, or sections from the templates for which we do not have corresponding code.
+3. Every button or form action must map to real code features.
+4. Output JSON format: {"title":"...","screens":[{"name":"...","purpose":"...","fields":["..."],"actions":["..."]}],"flow":["..."]}`
     : task === 'explain_build_error'
       ? 'Return exactly {"cause":"...","evidence":"...","nextAction":"...","explanation":"..."}. Turn the compiler or runtime diagnostic into a clear cause, evidence, next action, and plain explanation.'
     : task === 'interpret_idea'
@@ -71,7 +144,13 @@ async function runDirectGemini({ task, input, project }, timeoutMs) {
     : task === 'write_notes'
       ? 'Return exactly {"notes":"..."}. Format structured markdown project notes from verified project facts.'
     : task === 'write_slides'
-      ? 'Return exactly {"slides":[{"title":"...","content":"..."}]}. Create concise presentation slides from verified project facts.'
+      ? `Create presentation slides in LaTeX Beamer. You can base your layout/styling on one of these three templates depending on what fits best:
+${allLatexTemplates}
+Guidelines:
+1. Structure slides to present the Problem, Solution, Methodology, Results/Impact (mentioning the visual output), and Conclusion.
+2. Only include features and details actually implemented in the generated code files. Do NOT use placeholder text or unimplemented sections.
+3. Include TikZ diagram items representing the actual engine/pipeline workflow.
+4. Output JSON format: {"slides":[{"title":"...","content":"..."}]}`
     : 'Return exactly one JSON object with short plain-language fields.';
   const instruction = `You are the semantic writing worker for Project Notebook. Task: ${task}. Use only facts in the supplied JSON. Do not invent results, citations, metrics, compiler facts, or files. ${taskRule} If information is missing, say so instead of guessing.`;
   const controller = new AbortController();
@@ -98,6 +177,101 @@ async function runDirectGemini({ task, input, project }, timeoutMs) {
   } finally { clearTimeout(timer); }
 }
 
+async function runDirectAnthropic({ task, input, project, key }, timeoutMs) {
+  const apiKey = key || process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) throw new Error('Anthropic API key is not configured.');
+  const model = process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-20241022';
+  const taskRule = task === 'generate_code'
+    ? `Follow this full-stack project development prompt template:
+${codeTemplateContent}
+Guidelines:
+1. Generate a complete, functional, runnable backend (e.g. Node/Express or FastAPI) and matching React/Vite frontend.
+2. The generated code MUST produce a clear visual output (e.g., SVG diagrams, canvas graphics, or dynamic HTML visualization).
+3. Do NOT use fake placeholders or unimplemented button hooks. All logic must be real.
+4. Output JSON format: {"files":[{"path":"server.js","language":"javascript","role":"backend","content":"..."},{"path":"index.html","language":"html","role":"frontend","content":"..."}]}`
+    : 'Return exactly one JSON object with short plain-language fields.';
+  const instruction = `You are the semantic writing worker for Project Notebook. Task: ${task}. Use only facts in the supplied JSON. Do not invent results, citations, metrics, compiler facts, or files. ${taskRule} If information is missing, say so instead of guessing. You MUST respond with a valid raw JSON object. Do not include markdown formatting or prose outside the JSON.`;
+  
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'content-type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01'
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 4096,
+        system: instruction,
+        messages: [
+          { role: 'user', content: `Project JSON:\n${JSON.stringify({ project, input })}` }
+        ],
+        temperature: 0.2
+      })
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error?.message || `Anthropic API request failed (${response.status}).`);
+    const text = body.content?.[0]?.text?.trim();
+    if (!text) throw new Error('Anthropic API returned no text result.');
+    try { return parseAgentJson(text); } catch { throw new Error('Anthropic API returned text outside the required JSON shape.'); }
+  } catch (error) {
+    if (error.name === 'AbortError') throw new Error('Anthropic API request timed out before returning a response.');
+    throw error;
+  } finally { clearTimeout(timer); }
+}
+
+async function runDirectOpenAI({ task, input, project, key }, timeoutMs) {
+  const apiKey = key || process.env.OPENAI_API_KEY;
+  if (!apiKey) throw new Error('OpenAI API key is not configured.');
+  const model = process.env.OPENAI_MODEL || 'gpt-4o';
+  const taskRule = task === 'write_slides'
+    ? `Create presentation slides in LaTeX Beamer. You can base your layout/styling on one of these three templates depending on what fits best:
+${allLatexTemplates}
+Guidelines:
+1. Structure slides to present the Problem, Solution, Methodology, Results/Impact (mentioning the visual output), and Conclusion.
+2. Only include features and details actually implemented in the generated code files. Do NOT use placeholder text or unimplemented sections.
+3. Include TikZ diagram items representing the actual engine/pipeline workflow.
+4. Output JSON format: {"slides":[{"title":"...","content":"..."}]}`
+    : task === 'write_notes'
+      ? 'Return exactly {"notes":"..."}. Format structured markdown project notes from verified project facts.'
+      : 'Return exactly one JSON object with short plain-language fields.';
+  const instruction = `You are the semantic writing worker for Project Notebook. Task: ${task}. Use only facts in the supplied JSON. Do not invent results, citations, metrics, compiler facts, or files. ${taskRule} If information is missing, say so instead of guessing.`;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: 'system', content: instruction },
+          { role: 'user', content: `Project JSON:\n${JSON.stringify({ project, input })}` }
+        ],
+        response_format: { type: 'json_object' },
+        temperature: 0.2
+      })
+    });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error?.message || `OpenAI API request failed (${response.status}).`);
+    const text = body.choices?.[0]?.message?.content?.trim();
+    if (!text) throw new Error('OpenAI API returned no text result.');
+    try { return parseAgentJson(text); } catch { throw new Error('OpenAI API returned text outside the required JSON shape.'); }
+  } catch (error) {
+    if (error.name === 'AbortError') throw new Error('OpenAI API request timed out before returning a response.');
+    throw error;
+  } finally { clearTimeout(timer); }
+}
+
 function normalizeUISpec(raw) {
   let data = raw;
   if (typeof data === 'string') {
@@ -107,10 +281,13 @@ function normalizeUISpec(raw) {
     throw new Error('AI returned no valid UI specification structure.');
   }
 
-  if (data.result && typeof data.result === 'object') data = data.result;
-  else if (data.data && typeof data.data === 'object') data = data.data;
+  for (let index = 0; index < 4; index += 1) {
+    if (data.result && typeof data.result === 'object') data = data.result;
+    else if (data.data && typeof data.data === 'object') data = data.data;
+    else break;
+  }
 
-  let rawScreens = data.screens || data.pages || data.views || data.screenStack || data.interface || data.screens_list;
+  let rawScreens = data.screens || data.pages || data.views || data.screenStack || data.interface || data.screens_list || data.interfaceScreens || data.uiDefinition?.screens;
 
   if (rawScreens && !Array.isArray(rawScreens) && typeof rawScreens === 'object') {
     rawScreens = Object.entries(rawScreens).map(([key, val]) => typeof val === 'object' ? { name: key, ...val } : { name: key, purpose: String(val) });
@@ -171,7 +348,16 @@ function normalizeCodeSpec(raw) {
 
 export async function runADKTask(payload, timeoutMs = 60000) {
   let result;
-  if (process.env.ADK_SERVICE_URL) {
+  const task = payload?.task;
+  const userKeys = payload?.userKeys || {};
+
+  if (task === 'generate_code' && (userKeys.anthropic || process.env.ANTHROPIC_API_KEY)) {
+    result = await runDirectAnthropic({ ...payload, key: userKeys.anthropic }, timeoutMs);
+  } else if ((task === 'write_slides' || task === 'write_notes') && (userKeys.openai || process.env.OPENAI_API_KEY)) {
+    result = await runDirectOpenAI({ ...payload, key: userKeys.openai }, timeoutMs);
+  } else if (userKeys.gemini) {
+    result = await runDirectGemini({ ...payload, key: userKeys.gemini }, timeoutMs);
+  } else if (process.env.ADK_SERVICE_URL) {
     result = await runRemoteADK(payload, timeoutMs);
   } else if (process.env.REQUIRE_REMOTE_ADK === 'true' || process.env.NODE_ENV === 'production') {
     throw new Error('Remote ADK is required. Configure ADK_SERVICE_URL for the deployed ADK service.');

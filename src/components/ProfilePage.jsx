@@ -8,7 +8,8 @@ import {
   Code, 
   GraduationCap, 
   Target,
-  BookOpenCheck
+  BookOpenCheck,
+  Key
 } from 'lucide-react';
 
 const KNOWLEDGE_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
@@ -17,6 +18,26 @@ const SUBJECTS = ['AI', 'Compiler', 'Algorithms', 'Web', 'DistributedSystems'];
 
 export const ProfilePage = () => {
   const { profile, setProfile, setActiveStep } = useProject();
+
+  const [keys, setKeys] = React.useState(() => {
+    try {
+      const stored = localStorage.getItem('shariee-note:user-keys');
+      const parsed = stored ? JSON.parse(stored) : {};
+      return {
+        gemini: parsed.gemini || '',
+        openai: parsed.openai || '',
+        anthropic: parsed.anthropic || '',
+        github: parsed.github || ''
+      };
+    } catch {
+      return { gemini: '', openai: '', anthropic: '', github: '' };
+    }
+  });
+
+  const saveKeys = (newKeys) => {
+    setKeys(newKeys);
+    localStorage.setItem('shariee-note:user-keys', JSON.stringify(newKeys));
+  };
 
   const handleLevelChange = (langOrSubject, level, type = 'languages') => {
     setProfile((prev) => ({
@@ -144,11 +165,88 @@ export const ProfilePage = () => {
         </div>
       </div>
 
+      {/* AI Custom Keys */}
+      <div className="glass-panel-glow" style={{ padding: '24px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
+          <Key size={20} color="#F59E0B" />
+          <h3 style={{ fontSize: '1.15rem', color: '#FFF' }}>3. Optional Personal AI & GitHub Keys (Consent Integration)</h3>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
+            Saved locally in your browser. Fully integrated with your personal accounts.
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+          <div>
+            <label style={{ fontSize: '0.86rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+              Anthropic API Key (Claude)
+            </label>
+            <input
+              type="password"
+              placeholder="sk-ant-..."
+              className="input-field"
+              value={keys.anthropic}
+              onChange={(e) => saveKeys({ ...keys, anthropic: e.target.value })}
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+              Powers premium multi-file code generation (Claude 3.5 Sonnet).
+            </span>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.86rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+              OpenAI API Key (ChatGPT)
+            </label>
+            <input
+              type="password"
+              placeholder="sk-..."
+              className="input-field"
+              value={keys.openai}
+              onChange={(e) => saveKeys({ ...keys, openai: e.target.value })}
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+              Powers premium slides/PPT & structured notes (GPT-4o).
+            </span>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.86rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+              Google Gemini API Key
+            </label>
+            <input
+              type="password"
+              placeholder="AIzaSy..."
+              className="input-field"
+              value={keys.gemini}
+              onChange={(e) => saveKeys({ ...keys, gemini: e.target.value })}
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+              General reasoning, stage definitions, and build error explanations.
+            </span>
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.86rem', color: 'var(--text-muted)', display: 'block', marginBottom: '6px' }}>
+              GitHub Personal Access Token (PAT)
+            </label>
+            <input
+              type="password"
+              placeholder="ghp_..."
+              className="input-field"
+              value={keys.github}
+              onChange={(e) => saveKeys({ ...keys, github: e.target.value })}
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: 'block', marginTop: '4px' }}>
+              Allows publishing projects directly to your personal GitHub repository.
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Language & Subject Knowledge Matrix */}
       <div className="glass-panel" style={{ padding: '24px', marginBottom: '32px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', borderBottom: '1px solid var(--border-color)', paddingBottom: '12px' }}>
           <Code size={20} color="#10B981" />
-          <h3 style={{ fontSize: '1.15rem', color: '#FFF' }}>3. User Knowledge Matrix</h3>
+          <h3 style={{ fontSize: '1.15rem', color: '#FFF' }}>4. User Knowledge Matrix</h3>
           <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginLeft: 'auto' }}>
             Controls AI teaching density (no redundant explanations for Expert skills)
           </span>

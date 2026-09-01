@@ -1,0 +1,793 @@
+# FULL-STACK PROJECT DEVELOPMENT PROMPT
+
+You are a senior full-stack software engineer, UI/UX designer, backend engineer, and AI integration engineer.
+
+I will provide a PROJECT IDEA. Your job is to transform it into a complete, functional, production-structured full-stack application.
+
+Do NOT build a static demo.
+
+The application must actually work end-to-end.
+
+---
+
+# 1. PROJECT INPUT
+
+PROJECT NAME:
+[PROJECT NAME]
+
+PROJECT DESCRIPTION:
+[DESCRIBE THE PROJECT]
+
+TARGET USERS:
+[WHO WILL USE IT]
+
+CORE PROBLEM:
+[WHAT PROBLEM DOES IT SOLVE]
+
+CORE FEATURES:
+[LIST THE MAIN FEATURES]
+
+OPTIONAL FEATURES:
+[LIST NICE-TO-HAVE FEATURES]
+
+AI FEATURES:
+[DESCRIBE ANY AI/ML/LLM FEATURES]
+
+---
+
+# 2. REQUIRED TECHNOLOGY
+
+Use this architecture unless there is a strong technical reason to change it.
+
+## Frontend
+
+Use:
+
+* React
+* Vite
+* JavaScript or TypeScript
+* Modern CSS
+* Responsive design
+
+The frontend MUST run with:
+
+```bash
+npm run dev
+```
+
+and production build with:
+
+```bash
+npm run build
+```
+
+Create a proper:
+
+```text
+package.json
+```
+
+with all required dependencies and scripts.
+
+---
+
+# 3. BACKEND
+
+Use:
+
+* Python
+* FastAPI
+* Pydantic
+* Uvicorn
+
+The backend MUST run with:
+
+```bash
+uvicorn main:app --reload
+```
+
+or provide:
+
+```bash
+python main.py
+```
+
+if appropriate.
+
+Create a clean backend structure such as:
+
+```text
+backend/
+│
+├── main.py
+├── requirements.txt
+├── .env.example
+│
+├── api/
+├── models/
+├── schemas/
+├── services/
+├── database/
+└── utils/
+```
+
+Do NOT put the entire backend into one huge file.
+
+---
+
+# 4. FRONTEND STRUCTURE
+
+Create a maintainable structure such as:
+
+```text
+frontend/
+│
+├── package.json
+├── index.html
+├── src/
+│   ├── main.jsx
+│   ├── App.jsx
+│   │
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   ├── hooks/
+│   ├── utils/
+│   └── styles/
+│
+└── public/
+```
+
+Adapt the structure when the project requires it.
+
+---
+
+# 5. APPLICATION REQUIREMENTS
+
+The application must contain real functionality.
+
+Every important button must do something.
+
+Every form must:
+
+1. Accept user input
+2. Validate the input
+3. Send the appropriate request
+4. Handle loading state
+5. Handle success
+6. Handle errors
+7. Update the UI
+
+Do NOT create fake buttons such as:
+
+```text
+Coming Soon
+```
+
+unless the feature genuinely cannot be implemented.
+
+Do NOT use fake API responses when a real backend implementation is possible.
+
+---
+
+# 6. FRONTEND ↔ BACKEND
+
+Connect the React frontend to FastAPI.
+
+Use REST APIs unless another protocol is clearly required.
+
+Example:
+
+```text
+React
+   ↓
+HTTP Request
+   ↓
+FastAPI
+   ↓
+Service Layer
+   ↓
+Database / AI / External API
+   ↓
+FastAPI Response
+   ↓
+React UI
+```
+
+Create a centralized API service.
+
+For example:
+
+```text
+src/services/api.js
+```
+
+Do not scatter API URLs throughout components.
+
+Use an environment variable such as:
+
+```env
+VITE_API_URL=http://localhost:8000
+```
+
+Backend:
+
+```env
+PORT=8000
+```
+
+---
+
+# 7. API DESIGN
+
+Create proper API endpoints based on the project.
+
+For example:
+
+```text
+GET    /api/health
+GET    /api/items
+GET    /api/items/{id}
+POST   /api/items
+PUT    /api/items/{id}
+DELETE /api/items/{id}
+```
+
+Adapt these endpoints to the actual project.
+
+Every endpoint should:
+
+* Validate input
+* Return appropriate HTTP status codes
+* Return structured JSON
+* Handle exceptions
+* Avoid leaking sensitive information
+
+Also provide:
+
+```text
+GET /docs
+```
+
+through FastAPI's automatic Swagger documentation.
+
+---
+
+# 8. DATABASE
+
+If the project needs persistent data, implement a real database.
+
+Preferred options:
+
+* PostgreSQL for production
+* SQLite for simple local development
+
+Use an ORM or clean database abstraction.
+
+Create:
+
+```text
+database/
+├── connection.py
+├── models.py
+└── repository.py
+```
+
+Do not store important application data only in frontend state.
+
+Create appropriate tables based on the project.
+
+For example:
+
+```text
+users
+projects
+records
+results
+events
+```
+
+Adapt the schema to the actual application.
+
+---
+
+# 9. AUTHENTICATION
+
+If the project requires user accounts, implement proper authentication.
+
+Include:
+
+* Registration
+* Login
+* Logout
+* Password hashing
+* Protected API routes
+* User sessions or JWT
+* Frontend authentication state
+
+Never store plaintext passwords.
+
+Never expose secrets in frontend code.
+
+Create:
+
+```env
+SECRET_KEY=
+DATABASE_URL=
+```
+
+inside `.env.example`.
+
+---
+
+# 10. AI / ML INTEGRATION
+
+If the project requires AI:
+
+DO NOT put API keys directly into React.
+
+Correct architecture:
+
+```text
+React
+   ↓
+FastAPI
+   ↓
+AI Service
+   ↓
+LLM / ML Model / External AI API
+   ↓
+FastAPI
+   ↓
+React
+```
+
+Use environment variables:
+
+```env
+AI_API_KEY=
+```
+
+The frontend must never receive the secret API key.
+
+Create a dedicated AI service such as:
+
+```text
+backend/services/ai_service.py
+```
+
+The AI functionality should be actually connected to the application.
+
+---
+
+# 11. UI/UX
+
+Design the application based on the PROJECT IDEA.
+
+Do not generate a generic dashboard unless the project genuinely needs one.
+
+The UI should be:
+
+* Modern
+* Clean
+* Responsive
+* Accessible
+* Easy to understand
+* Mobile friendly
+* Desktop friendly
+
+Use a consistent:
+
+* Typography system
+* Spacing system
+* Color palette
+* Button style
+* Card style
+* Input style
+
+Avoid excessive gradients, unnecessary animations, and visual clutter.
+
+---
+
+# 12. PROJECT PRESENTATION STRUCTURE
+
+The application should conceptually communicate the same story as a project presentation:
+
+```text
+PROBLEM
+   ↓
+SOLUTION
+   ↓
+HOW IT WORKS
+   ↓
+RESULT
+   ↓
+IMPACT
+```
+
+Use this logic when deciding what the main pages and components should communicate.
+
+For example:
+
+```text
+Landing Page
+      ↓
+Problem / Context
+      ↓
+Core Application
+      ↓
+Results
+      ↓
+Impact / Insights
+```
+
+Adapt this according to the actual project.
+
+---
+
+# 13. ERROR HANDLING
+
+Implement proper error handling.
+
+Frontend must handle:
+
+```text
+Loading
+Success
+Empty state
+Validation error
+Server error
+Network error
+Authentication error
+```
+
+Backend must handle:
+
+```text
+400 Bad Request
+401 Unauthorized
+403 Forbidden
+404 Not Found
+422 Validation Error
+500 Internal Server Error
+```
+
+Show useful messages to users.
+
+Do not expose stack traces or secrets.
+
+---
+
+# 14. LOADING STATES
+
+Every asynchronous operation should have a loading state.
+
+For example:
+
+```text
+Submitting...
+Processing...
+Analyzing...
+Generating...
+Loading...
+```
+
+Do not leave the user wondering whether the application is working.
+
+---
+
+# 15. RESPONSIVENESS
+
+The application MUST work on:
+
+```text
+Mobile
+Tablet
+Laptop
+Desktop
+```
+
+Do not simply shrink the desktop interface.
+
+Create proper responsive layouts.
+
+---
+
+# 16. SECURITY
+
+Follow basic production security practices.
+
+Never hardcode:
+
+* API keys
+* Passwords
+* Database credentials
+* Tokens
+* Private URLs
+
+Use:
+
+```text
+.env
+.env.example
+```
+
+Add `.env` to `.gitignore`.
+
+Validate all backend input.
+
+Use CORS appropriately.
+
+Do not trust frontend validation alone.
+
+---
+
+# 17. ENVIRONMENT CONFIGURATION
+
+Create:
+
+```text
+.env.example
+```
+
+with all required variables.
+
+Example:
+
+```env
+VITE_API_URL=http://localhost:8000
+
+DATABASE_URL=
+
+SECRET_KEY=
+
+AI_API_KEY=
+```
+
+Only include variables that the project actually needs.
+
+---
+
+# 18. README
+
+Create a complete:
+
+```text
+README.md
+```
+
+containing:
+
+## Project
+
+Short description.
+
+## Features
+
+List the implemented features.
+
+## Architecture
+
+Explain:
+
+```text
+Frontend
+   ↓
+FastAPI
+   ↓
+Database / AI
+```
+
+## Requirements
+
+List required software.
+
+## Installation
+
+Explain exactly how to install everything.
+
+## Environment Variables
+
+Explain `.env`.
+
+## Running Frontend
+
+```bash
+npm install
+npm run dev
+```
+
+## Running Backend
+
+```bash
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+## Production Build
+
+```bash
+npm run build
+```
+
+## API Documentation
+
+Explain where FastAPI Swagger is available.
+
+---
+
+# 19. DO NOT OVERENGINEER
+
+Start with the simplest architecture capable of solving the project.
+
+Do NOT introduce:
+
+* Microservices
+* Kubernetes
+* Redis
+* Kafka
+* GraphQL
+* Complex authentication
+* Multiple databases
+
+unless the project genuinely requires them.
+
+Prefer:
+
+```text
+React + Vite
+       ↓
+FastAPI
+       ↓
+Database / AI
+```
+
+Keep the architecture understandable.
+
+---
+
+# 20. IMPLEMENTATION RULE
+
+When generating the project:
+
+1. Understand the project idea.
+2. Identify the minimum viable features.
+3. Design the architecture.
+4. Create the project structure.
+5. Implement the backend.
+6. Implement the frontend.
+7. Connect frontend and backend.
+8. Implement database functionality if required.
+9. Implement AI functionality if required.
+10. Add error handling.
+11. Add loading states.
+12. Make the UI responsive.
+13. Test the main user flow.
+14. Fix errors.
+15. Provide setup instructions.
+
+Do not stop after creating the UI.
+
+The final result must be a FUNCTIONAL APPLICATION.
+
+---
+
+# 21. TEST THE COMPLETE FLOW
+
+Before considering the project complete, verify:
+
+```text
+Application starts
+        ↓
+Frontend loads
+        ↓
+Frontend connects to FastAPI
+        ↓
+API responds
+        ↓
+User can perform the main action
+        ↓
+Backend processes request
+        ↓
+Database / AI works
+        ↓
+Result returns
+        ↓
+Frontend displays result
+```
+
+If something fails, fix it before finishing.
+
+---
+
+# 22. CODE QUALITY
+
+Write clean, understandable code.
+
+Use:
+
+* Meaningful variable names
+* Small reusable components
+* Modular services
+* Proper error handling
+* Comments only where useful
+* No unnecessary duplication
+
+Do not generate placeholder implementations when a real implementation is possible.
+
+Avoid:
+
+```javascript
+// TODO: implement later
+```
+
+for core functionality.
+
+---
+
+# 23. FINAL OUTPUT
+
+After implementation, provide:
+
+### 1. Project structure
+
+```text
+project/
+├── frontend/
+├── backend/
+├── .env.example
+├── .gitignore
+└── README.md
+```
+
+### 2. Installation commands
+
+Exactly what the developer must run.
+
+### 3. Run commands
+
+Frontend:
+
+```bash
+npm run dev
+```
+
+Backend:
+
+```bash
+uvicorn main:app --reload
+```
+
+### 4. Environment variables
+
+Explain every required variable.
+
+### 5. Main API endpoints
+
+List the implemented endpoints.
+
+### 6. Main user flow
+
+Explain how a user uses the application.
+
+### 7. Testing
+
+Explain how to verify that the application works.
+
+---
+
+# IMPORTANT DEVELOPMENT RULE
+
+Do not assume the project is a generic CRUD application.
+
+Understand the PROJECT IDEA first.
+
+Build the UI, backend, database, AI and APIs specifically around the project's real purpose.
+
+The final application should feel like a real product built for the stated users — not a template with the project name changed.
+
+If a requirement is ambiguous, choose the simplest reasonable implementation and continue rather than stopping unnecessarily.
+
+The priority is:
+
+FUNCTIONALITY > SIMPLICITY > RELIABILITY > VISUAL POLISH > COMPLEXITY.

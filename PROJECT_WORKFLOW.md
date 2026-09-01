@@ -248,10 +248,10 @@ Files added:
 - `server/research.mjs`: searches OpenAlex, Semantic Scholar, Crossref, Europe PMC, and arXiv, deduplicates metadata, and leaves Google Scholar as a compliant search link.
 - `server/github.mjs`: sequential file writes using a server-only token. It targets `GITHUB_REPOSITORY_URL` when configured and updates existing files with their SHA; otherwise it creates a private repository.
 - `src/integrations/supabaseClient.js`: REST persistence adapter using the signed-in user token; local storage remains the offline fallback.
-- `src/integrations/firebaseClient.js` and `public/firebase-messaging-sw.js`: optional FCM web push adapter loaded only when configured and served from HTTPS/localhost.
+- `src/integrations/firebaseConfig.js`, `src/integrations/firebaseAI.js`, `src/integrations/firebaseClient.js`, and `public/firebase-messaging-sw.js`: Firebase AI Logic with structured JSON output and App Check, plus the optional FCM web push adapter.
 - `supabase/migrations/0001_project_notebook.sql`: projects, agent runs, artifacts, timestamps, and owner-only RLS policies.
 - `.env.example`: safe configuration checklist. Copy it to `.env.local`; never commit real values.
-- `.env.local`: local Supabase project, Gemini key/model, and `Project-Notes` target configured from the supplied values. Firebase remains unconfigured.
+- `.env.local`: local Supabase project, Gemini key/model, Firebase Web App config, and `Project-Notes` target configured from the supplied values.
 
 Run the two local processes during development:
 
@@ -266,7 +266,7 @@ The current UI now exposes two real actions: Build → `Verify with compiler` an
 
 ## 17. Resource and dependency note
 
-The project uses browser-native `fetch` for Supabase and server APIs, keeping the core build small. Firebase modules are loaded only when push is requested. The production agent is a real Google ADK API server deployed from GitHub to Cloud Run; direct Gemini REST is only the development fallback until `ADK_SERVICE_URL` is configured. GitHub remains the versioned export target, while Supabase remains live application storage.
+The project uses browser-native `fetch` for Supabase and server APIs, keeping the core build small. Firebase AI Logic and messaging modules are loaded through the Firebase Web SDK. The production agent is a real Google ADK API server deployed from GitHub to Cloud Run; direct Gemini REST is only the development fallback until `ADK_SERVICE_URL` is configured. GitHub remains the versioned export target, while Supabase remains live application storage.
 
 ## 18. Current credential and integration status
 
@@ -275,7 +275,7 @@ Validated without printing secrets:
 - Gemini API key: model discovery succeeds and `gemini-3.5-flash-lite` returns a valid JSON response.
 - GitHub fine-grained token: can read `akirashavin-del/Project-Notes`; the repository reports push permission and uses the `main` branch.
 - Supabase: corrected project URL and anon JWT now match; the project is reachable and `public.projects` is available after the migration.
-- Firebase: not configured yet.
+- Firebase: Web App registered; AI Logic must be enabled for the app and App Check must be registered before production use.
 - Online compiler probe: Python, C, and Java are available through the configured Judge0-compatible endpoint. The public Piston endpoint is no longer used because it is whitelist-only.
 
 ## 19. What the product team must provide
@@ -283,7 +283,7 @@ Validated without printing secrets:
 1. Supabase Dashboard → open SQL Editor, run `supabase/migrations/0001_project_notebook.sql`, and choose the first sign-in method. Email magic link is the simplest. The app needs a signed-in user before RLS-protected sync can work.
 2. Google AI Studio → keep the Gemini key server-side and decide the usage budget/free-tier limit. The code uses Flash Lite and only calls Gemini for human-language tasks.
 3. GitHub → keep the fine-grained token limited to this repository with Contents read/write, rotate it after sharing it in chat, and later replace the personal token with a GitHub App or OAuth installation for production.
-4. Firebase Console → create a web app, provide the public Firebase config and Web Push VAPID key, then enable Cloud Messaging. Firebase is only for phone notifications; Supabase remains the data source.
+4. Firebase Console → enable AI Logic for the registered web app, register production App Check, and provide the public Firebase config. Add the Web Push VAPID key only if notifications are needed; Supabase remains the data source for project persistence.
 5. Deployment → choose one HTTPS host for the React app and one worker host for Node/Python. Production needs HTTPS, environment secrets, a custom domain, logs, and a managed process/queue.
 6. Product decisions → confirm the first supported language pair, approved research sources/APIs, whether LaTeX/PDF compilation runs on the server, and the later WhatsApp provider. These choices affect cost and security.
 

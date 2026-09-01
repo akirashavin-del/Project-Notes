@@ -7,12 +7,14 @@
     "dev": "node server/dev.mjs",
     "dev:vite": "vite",
     "server": "node server/index.mjs",
+    "start": "node server/index.mjs",
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",
+    "firebase": "^12.18.0",
     "lucide-react": "^1.31.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"

@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title><!-- PROMPT: Replace with your app name --> App Name</title>
+
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     PROMPT: This template is a dark, app/dashboard shell —
+     sidebar + top bar + content area — instead of a marketing
+     landing page. Good starting point for internal tools, admin
+     panels, SaaS dashboards. Replace tokens to match your brand.
+  ============================================================ */
+  :root {
+    --color-bg: #0f1115;          /* app background */
+    --color-surface: #171a21;     /* panels, cards */
+    --color-surface-raised: #1f232c; /* sidebar, modals */
+    --color-border: #2a2e38;
+    --color-text: #e8e9ec;
+    --color-text-muted: #8b8fa3;
+    --color-primary: #6366f1;     /* main brand/accent color */
+    --color-primary-hover: #4f52d6;
+    --color-success: #22c55e;
+    --color-warning: #eab308;
+    --color-danger: #ef4444;
+
+    --font-display: "Inter", system-ui, sans-serif;
+    --font-body: "Inter", system-ui, sans-serif;
+    --font-mono: "SFMono-Regular", Consolas, monospace; /* for numbers/data */
+
+    --radius-sm: 6px;
+    --radius-md: 12px;
+    --sidebar-width: 240px;
+    --topbar-height: 60px;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 40px;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+  h1, h2, h3 { font-family: var(--font-display); margin: 0 0 var(--space-2); }
+  p { margin: 0; color: var(--color-text-muted); }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; }
+
+  .app-shell {
+    display: grid;
+    grid-template-columns: var(--sidebar-width) 1fr;
+    min-height: 100vh;
+  }
+
+  /* ============================================================
+     SIDEBAR
+     PROMPT: Replace nav items/icons with your app's real sections.
+     Group related items with the .nav-group-label pattern.
+  ============================================================ */
+  .sidebar {
+    background: var(--color-surface-raised);
+    border-right: 1px solid var(--color-border);
+    padding: var(--space-4) var(--space-3);
+    display: flex;
+    flex-direction: column;
+  }
+  .sidebar .brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: var(--space-5);
+    padding: 0 var(--space-2);
+  }
+  .sidebar .brand .logo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--color-primary);
+  }
+  .nav-group-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-muted);
+    padding: var(--space-2) var(--space-2) var(--space-1);
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--color-surface); color: var(--color-text); }
+  .nav-item.active {
+    background: rgba(99,102,241,0.15);
+    color: var(--color-primary);
+    font-weight: 600;
+  }
+  .sidebar .sidebar-footer {
+    margin-top: auto;
+    padding: var(--space-2);
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-3);
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: 0.85rem;
+  }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+
+  /* ============================================================
+     MAIN COLUMN
+  ============================================================ */
+  .main {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  /* ============================================================
+     TOP BAR
+     PROMPT: Replace page title dynamically per-view. Add/remove
+     actions (search, notifications, primary button) as needed.
+  ============================================================ */
+  .topbar {
+    height: var(--topbar-height);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-4);
+    flex-shrink: 0;
+  }
+  .topbar h1 { font-size: 1.1rem; margin: 0; }
+  .topbar .actions { display: flex; align-items: center; gap: var(--space-3); }
+  .search-box {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: var(--space-1) var(--space-2);
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    width: 200px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border: 1px solid transparent;
+    transition: background 0.15s ease;
+  }
+  .btn-primary { background: var(--color-primary); color: #fff; }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-ghost { background: transparent; color: var(--color-text-muted); border-color: var(--color-border); }
+  .btn-ghost:hover { color: var(--color-text); background: var(--color-surface); }
+
+  /* ============================================================
+     CONTENT AREA
+     PROMPT: This is the scrollable body of the page. Everything
+     below (stats, table, panel) is example content — replace with
+     your actual dashboard widgets/views.
+  ============================================================ */
+  .content {
+    padding: var(--space-4);
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  /* Stat cards row — PROMPT: swap metrics for your real KPIs */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+  .stat-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+  }
+  .stat-card .label {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
+  }
+  .stat-card .value {
+    font-family: var(--font-mono);
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .stat-card .delta { font-size: 0.8rem; margin-top: var(--space-1); }
+  .delta.up { color: var(--color-success); }
+  .delta.down { color: var(--color-danger); }
+
+  /* Data table — PROMPT: replace columns/rows with real data,
+     or delete this whole block if your app isn't table-driven */
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-3) var(--space-3);
+    border-bottom: 1px solid var(--color-border);
+  }
+  .panel-header h2 { font-size: 0.95rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: var(--space-2) var(--space-3); }
+  thead th {
+    color: var(--color-text-muted);
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    border-bottom: 1px solid var(--color-border);
+  }
+  tbody tr { border-bottom: 1px solid var(--color-border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--color-surface-raised); }
+  .status-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .status-pill.active { background: rgba(34,197,94,0.15); color: var(--color-success); }
+  .status-pill.pending { background: rgba(234,179,8,0.15); color: var(--color-warning); }
+  .status-pill.inactive { background: rgba(139,143,163,0.15); color: var(--color-text-muted); }
+
+  /* ============================================================
+     EMPTY STATE
+     PROMPT: Reuse this pattern anywhere a list/table could be
+     empty. Replace copy + action with what fits that context.
+  ============================================================ */
+  .empty-state {
+    text-align: center;
+    padding: var(--space-5);
+    color: var(--color-text-muted);
+  }
+  .empty-state h3 { color: var(--color-text); font-size: 1rem; }
+
+  /* ============================================================
+     RESPONSIVE
+     PROMPT: Below this width, sidebar collapses to icons only —
+     or swap to an off-canvas drawer if your app needs full labels
+     on mobile.
+  ============================================================ */
+  @media (max-width: 900px) {
+    .app-shell { grid-template-columns: 64px 1fr; }
+    .sidebar .brand span:not(.logo-dot),
+    .nav-item span.label,
+    .nav-group-label,
+    .sidebar-footer span { display: none; }
+    .search-box { display: none; }
+  }
+
+  a:focus-visible, button:focus-visible, input:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ============================================================
+       SIDEBAR NAV
+       PROMPT: Replace "App Name" and nav items with your real
+       app sections. Mark the current page with class="active".
+  ============================================================ -->
+  <aside class="sidebar">
+    <div class="brand"><span class="logo-dot"></span><span>App Name</span></div>
+
+    <div class="nav-group-label">Main</div>
+    <a href="#" class="nav-item active">📊 <span class="label">Overview</span></a>
+    <a href="#" class="nav-item">📁 <span class="label">Projects</span></a>
+    <a href="#" class="nav-item">✅ <span class="label">Tasks</span></a>
+    <a href="#" class="nav-item">👥 <span class="label">Team</span></a>
+
+    <div class="nav-group-label">Other</div>
+    <a href="#" class="nav-item">⚙️ <span class="label">Settings</span></a>
+    <a href="#" class="nav-item">❓ <span class="label">Help</span></a>
+
+    <div class="sidebar-footer">
+      <div class="avatar">JD</div>
+      <span>Jane Doe</span>
+    </div>
+  </aside>
+
+  <div class="main">
+
+    <!-- ============================================================
+         TOP BAR
+         PROMPT: Title updates per-view. Add/remove the search box
+         and primary action to fit what this page actually needs.
+    ============================================================ -->
+    <header class="topbar">
+      <h1>Overview</h1>
+      <div class="actions">
+        <input class="search-box" type="text" placeholder="Search…" />
+        <button class="btn btn-ghost">🔔</button>
+        <button class="btn btn-primary">+ New</button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ============================================================
+           STAT CARDS
+           PROMPT: Replace with your real KPIs (revenue, users,
+           errors, whatever this dashboard is meant to surface).
+      ============================================================ -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="label">Metric One</div>
+          <div class="value">1,284</div>
+          <div class="delta up">▲ 4.2% vs last period</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Metric Two</div>
+          <div class="value">$8,942</div>
+          <div class="delta up">▲ 1.8% vs last period</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Metric Three</div>
+          <div class="value">37</div>
+          <div class="delta down">▼ 2.1% vs last period</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Metric Four</div>
+          <div class="value">92%</div>
+          <div class="delta up">▲ 0.5% vs last period</div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           DATA TABLE
+           PROMPT: Replace column headers and row data with your
+           real records. Wire up sortable headers / row actions in
+           the script section below if needed.
+      ============================================================ -->
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Recent Items</h2>
+          <button class="btn btn-ghost">View all</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Owner</th>
+              <th>Status</th>
+              <th>Updated</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td>Item One</td>
+              <td>Jane Doe</td>
+              <td><span class="status-pill active">Active</span></td>
+              <td>2 hours ago</td>
+            </tr>
+            <tr>
+              <td>Item Two</td>
+              <td>Sam Lee</td>
+              <td><span class="status-pill pending">Pending</span></td>
+              <td>Yesterday</td>
+            </tr>
+            <tr>
+              <td>Item Three</td>
+              <td>Jane Doe</td>
+              <td><span class="status-pill inactive">Inactive</span></td>
+              <td>3 days ago</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ============================================================
+           EMPTY STATE EXAMPLE (hidden by default)
+           PROMPT: Toggle this pattern on when a real list/table has
+           zero results. Delete if you don't need an empty state here.
+      ============================================================ -->
+      <!--
+      <div class="empty-state">
+        <h3>No items yet</h3>
+        <p>Create your first item to see it here.</p>
+      </div>
+      -->
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============================================================
+  // TOPBAR TITLE SYNC
+  // PROMPT: If this becomes a multi-page/SPA-style app, update
+  // this to set the topbar <h1> based on which nav-item is active.
+  // ============================================================
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      item.classList.add('active');
+      const label = item.querySelector('.label')?.textContent || item.textContent.trim();
+      document.querySelector('.topbar h1').textContent = label;
+    });
+  });
+
+  // ============================================================
+  // NEW ITEM BUTTON (placeholder)
+  // PROMPT: Replace this with opening a real modal/form, or a
+  // navigation to a create page.
+  // ============================================================
+  document.querySelector('.btn-primary').addEventListener('click', () => {
+    alert('Wire this up to your real "create new item" flow.');
+  });
+</script>
+
+</body>
+</html>

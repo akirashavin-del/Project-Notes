@@ -9,10 +9,13 @@ import {
   GitBranch,
   LogOut,
   Search,
+  Bell,
+  BellOff,
 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 import { getStage, getStageIndex, WORKFLOW_STAGES } from '../workflow/stages';
-import { compileCode, publishGithub, runAgentTask, searchResearch } from '../services/agentClient';
+import { compileCode, publishGithub, runAgentTask, searchResearch, registerPushToken } from '../services/agentClient';
+import { isFirebaseMessagingConfigured, requestPushPermission, listenForPushMessages } from '../integrations/firebaseClient';
 
 const STAGE_NUMBERS = Object.fromEntries(WORKFLOW_STAGES.map((stage, index) => [stage.id, String(index + 1).padStart(2, '0')]));
 
@@ -36,7 +39,7 @@ const GhostButton = ({ children, onClick, disabled = false }) => (
 );
 
 const ProfileStage = () => {
-  const { profile, setProfile, setActiveStep } = useProject();
+  const { profile, setProfile, setActiveStep, project } = useProject();
   const levels = ['Beginner', 'Intermediate', 'Advanced', 'Expert'];
   const update = (field, value) => setProfile((current) => ({ ...current, [field]: value }));
   const knowledge = [
@@ -46,6 +49,42 @@ const ProfileStage = () => {
     ['Compilers', profile.subjects?.Compiler],
     ['AI / ML', profile.subjects?.AI],
   ];
+
+  const [notificationStatus, setNotificationStatus] = useState('unknown'); // 'unknown', 'granted', 'denied', 'not-configured', 'submitting'
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    if (!isFirebaseMessagingConfigured) {
+      setNotificationStatus('not-configured');
+    } else if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'granted') {
+        setNotificationStatus('granted');
+      } else if (Notification.permission === 'denied') {
+        setNotificationStatus('denied');
+      } else {
+        setNotificationStatus('prompt');
+      }
+    } else {
+      setNotificationStatus('not-supported');
+    }
+  }, []);
+
+  const enableNotifications = async () => {
+    setNotificationStatus('submitting');
+    setErrorMsg('');
+    try {
+      if (!isFirebaseMessagingConfigured) {
+        throw new Error('Firebase credentials are not configured in VITE environment variables.');
+      }
+      const token = await requestPushPermission();
+      await registerPushToken({ projectId: project.id, token });
+      setNotificationStatus('granted');
+    } catch (error) {
+      console.error(error);
+      setErrorMsg(error.message);
+      setNotificationStatus('denied');
+    }
+  };
 
   return (
     <section className="notebook-stage">
@@ -61,10 +100,44 @@ const ProfileStage = () => {
           <div className="form-row"><label className="field-label">Preferred explanation level</label><div className="segmented">{levels.map((level) => <button className={profile.overallLevel === level ? 'on' : ''} key={level} onClick={() => update('overallLevel', level)}>{level}</button>)}</div></div>
           <div className="form-row" style={{ marginBottom: 0 }}><label className="field-label">Technical subjects known</label><div className="tag-row"><span className="tag">Data structures</span><span className="tag">Web dev</span><span className="tag">Applied ML</span><span className="tag">+ Add subject</span></div></div>
         </div>
-        <div className="card card-pad">
-          <p className="rside-title" style={{ marginBottom: 16 }}>Generated knowledge model</p>
-          <table className="know-table"><thead><tr><th>Subject</th><th>Level</th></tr></thead><tbody>{knowledge.map(([subject, level]) => <tr key={subject}><td>{subject}</td><td><span className={`lvl-pill lvl-${level || 'Beginner'}`}>{level || 'Beginner'}</span></td></tr>)}</tbody></table>
-          <div className="note-box">This controls research depth and code explanations. The notebook will only teach what the current project actually needs.</div>
+        <div>
+          <div className="card card-pad">
+            <p className="rside-title" style={{ marginBottom: 16 }}>Generated knowledge model</p>
+            <table className="know-table"><thead><tr><th>Subject</th><th>Level</th></tr></thead><tbody>{knowledge.map(([subject, level]) => <tr key={subject}><td>{subject}</td><td><span className={`lvl-pill lvl-${level || 'Beginner'}`}>{level || 'Beginner'}</span></td></tr>)}</tbody></table>
+            <div className="note-box">This controls research depth and code explanations. The notebook will only teach what the current project actually needs.</div>
+          </div>
+
+          <div className="card card-pad" style={{ marginTop: 16 }}>
+            <p className="rside-title" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 6 }}>
+              {notificationStatus === 'granted' ? <Bell size={15} color="#10B981" /> : <BellOff size={15} color="#EF4444" />}
+              Firebase Push Notifications
+            </p>
+            <div className="note-box" style={{ marginBottom: 12 }}>
+              Receive real-time push notifications when backend agent tasks or compilation runs finish.
+            </div>
+            {notificationStatus === 'not-configured' && (
+              <div style={{ fontSize: 12, color: 'var(--ink-soft)', lineHeight: 1.4, background: 'rgba(255, 179, 0, 0.08)', border: '1px solid rgba(255,179,0,0.2)', borderRadius: 6, padding: 10, marginBottom: 12 }}>
+                ⚠️ <b>Configuration Required:</b> Firebase credentials are not configured in <code>.env.local</code>. Configure VITE_FIREBASE_* values to enable.
+              </div>
+            )}
+            {errorMsg && (
+              <div style={{ fontSize: 12, color: '#EF4444', lineHeight: 1.4, background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 6, padding: 10, marginBottom: 12 }}>
+                Error: {errorMsg}
+              </div>
+            )}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 13, color: 'var(--ink-soft)' }}>
+                Status: <strong>{notificationStatus === 'granted' ? 'Enrolled' : notificationStatus === 'not-configured' ? 'Not Configured' : notificationStatus === 'denied' ? 'Permission Denied' : 'Inactive'}</strong>
+              </span>
+              <button 
+                className={`notebook-btn sm ${notificationStatus === 'granted' ? 'ghost' : 'teal'}`}
+                onClick={enableNotifications} 
+                disabled={notificationStatus === 'submitting' || notificationStatus === 'not-supported'}
+              >
+                {notificationStatus === 'submitting' ? 'Enrolling...' : notificationStatus === 'granted' ? 'Enrolled' : 'Enable'}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
       <StageActions><PrimaryButton onClick={() => setActiveStep('idea')}>Continue to Idea <ArrowRight size={15} /></PrimaryButton></StageActions>
@@ -280,7 +353,7 @@ const BuildStage = () => {
     if (activeFile?.role !== 'entry') { setCompileState({ status: 'error', result: null, error: 'Select an entry file to compile. Test and support files stay in the stack for context.' }); return; }
     setCompileState({ status: 'running', result: null, error: '' });
     setErrorTeacherState({ status: 'idle', result: null, error: '' });
-    try { setCompileState({ status: 'done', result: await compileCode({ language: activeLanguage, code, stdin }), error: '' }); }
+    try { setCompileState({ status: 'done', result: await compileCode({ language: activeLanguage, code, stdin, projectId: project.id }), error: '' }); }
     catch (error) { setCompileState({ status: 'error', result: null, error: error.message }); }
   };
   const generateStack = async () => {
@@ -350,7 +423,7 @@ const UIStage = () => {
   const generateUI = async () => {
     setUIState({ status: 'running', error: '' });
     try {
-      const response = await runAgentTask({ task: 'generate_ui', project: { id: project.id, idea, projectDefinition }, input: { files: (codeFiles || []).map((file) => ({ path: file.path, language: file.language, role: file.role })), requirement: 'Design a simple phone-first interface for the verified project. Do not add features unrelated to the project.' } });
+      const response = await runAgentTask({ task: 'generate_ui', project: { id: project.id, idea, projectDefinition }, input: { files: (codeFiles || []).map((file) => ({ path: file.path, language: file.language, role: file.role, content: (file.content || '').slice(0, 3000) })), requirement: 'Design a simple phone-first interface for the verified project. Do not add features unrelated to the project.' } });
       const spec = response.result;
       if (!spec?.screens?.length) throw new Error('AI generation completed but returned no usable interface screens.');
       setUIDefinition(spec);
@@ -431,10 +504,75 @@ const EditablePresentStage = () => {
 void PresentStage;
 
 const ExportStage = () => {
-  const { exportProject, project, researchGraph, codeSamples, codeFiles, projectNotes } = useProject();
+  const { exportProject, project, researchGraph, codeSamples, codeFiles, projectNotes, projectDefinition, idea, profile } = useProject();
   const [publishState, setPublishState] = useState({ status: 'idle', result: null, error: '' });
   const files = ['src/', 'ui/', 'research/', 'notes/project-notes.md', 'presentation/main.tex', 'README.md', 'project-context.json'];
-  const publish = async () => { setPublishState({ status: 'running', result: null, error: '' }); const slug = (project?.id || 'project-notebook').replace(/[^a-zA-Z0-9._-]/g, '-'); const sourceFiles = (codeFiles || []).map((file) => ({ path: file.path, content: file.content || '' })); try { setPublishState({ status: 'done', result: await publishGithub({ name: slug, description: 'Project Notebook export', files: [...sourceFiles, { path: 'notes/project-notes.md', content: projectNotes || '# Project notes' }, { path: 'research/research.json', content: JSON.stringify(researchGraph, null, 2) }] }), error: '' }); } catch (error) { setPublishState({ status: 'error', result: null, error: error.message }); } };
+  
+  const publish = async () => {
+    setPublishState({ status: 'running', result: null, error: '' });
+    const slug = (project?.id || 'project-notebook').replace(/[^a-zA-Z0-9._-]/g, '-');
+    const sourceFiles = (codeFiles || []).map((file) => ({ path: file.path, content: file.content || '' }));
+    
+    // Construct presentation LaTeX
+    const slideItems = [
+      ['Problem statement', projectDefinition?.problem || idea.problem || 'The project problem will be written from the verified definition.'],
+      ['Proposed architecture', projectDefinition?.solution || idea.proposedApproach || 'The project architecture will be generated from the verified project state.'],
+      ['Implementation and results', 'Results will be added only from successful recorded runs.'],
+    ];
+    
+    const latexBeamerCode = `\\documentclass{beamer}
+\\usetheme{metropolis}
+\\title{${(projectDefinition?.title || idea.domain || 'Project').substring(0, 60)}}
+\\author{${profile.name || 'Developer'}}
+\\date{\\today}
+
+\\begin{document}
+\\frame{\\titlepage}
+${slideItems.map((s) => `\\begin{frame}{${s[0]}}\n  ${s[1]}\n\\end{frame}`).join('\n')}
+\\end{document}`;
+
+    // Construct README
+    const readmeCode = `# ${projectDefinition?.title || idea.domain || 'Project'}
+
+${projectDefinition?.problem || idea.problem || ''}
+
+## Objective
+${projectDefinition?.objective || idea.objective || ''}
+
+## Solution
+${projectDefinition?.solution || idea.solution || ''}
+
+## Novelty
+${projectDefinition?.novelty || idea.novelty || ''}
+
+## Exported Artifacts
+- Source code in \`src/\`
+- Research references in \`research/research.json\`
+- Slide Presentation in \`presentation/main.tex\`
+- Study notes in \`notes/project-notes.md\`
+`;
+
+    try {
+      setPublishState({
+        status: 'done',
+        result: await publishGithub({
+          name: slug,
+          description: 'Project Notebook export',
+          files: [
+            ...sourceFiles,
+            { path: 'notes/project-notes.md', content: projectNotes || '# Project notes' },
+            { path: 'research/research.json', content: JSON.stringify(researchGraph, null, 2) },
+            { path: 'presentation/main.tex', content: latexBeamerCode },
+            { path: 'README.md', content: readmeCode }
+          ]
+        }),
+        error: ''
+      });
+    } catch (error) {
+      setPublishState({ status: 'error', result: null, error: error.message });
+    }
+  };
+
   return <section className="notebook-stage"><StageIntro stageId="export" title="Take the finished project with you" subtitle="Prepare the project files, notes, presentation, and context for download or a confirmed GitHub publish." /><div className="export-grid"><div className="card card-pad"><p className="rside-title">Export package</p>{files.map((file) => <div className="export-file" key={file}><FileText size={14} />{file}</div>)}<StageActions><PrimaryButton onClick={() => exportProject('json')}><Download size={15} /> Download context</PrimaryButton></StageActions></div><div className="card card-pad"><p className="rside-title">GitHub publishing</p><p style={{ fontSize: 13, color: 'var(--ink-soft)', lineHeight: 1.55 }}>Publishing updates the configured Project-Notes repository with the current project files. The server keeps the GitHub token out of the browser.</p><StageActions><GhostButton onClick={publish} disabled={publishState.status === 'running'}><GitBranch size={15} /> {publishState.status === 'running' ? 'Publishing…' : 'Publish to GitHub'}</GhostButton></StageActions>{publishState.status !== 'idle' && <div className={`build-result ${publishState.status}`}><b>{publishState.status === 'done' ? 'GitHub export complete.' : publishState.status === 'running' ? 'Preparing repository…' : 'GitHub export could not be completed.'}</b><span>{publishState.result?.result?.url || publishState.error}</span></div>}<div className="context-list" style={{ marginTop: 22 }}><div><strong>Project</strong>{project?.id || 'local-project'}</div><div><strong>Research</strong>{researchGraph.length} sources</div><div><strong>Code</strong>{Object.keys(codeSamples || {}).length} workspaces</div><div><strong>Notes</strong>{projectNotes ? 'Ready' : 'Pending'}</div></div></div></div></section>;
 };
 
@@ -445,7 +583,24 @@ export const ReferenceNotebook = ({ onSignOut }) => {
 
   useEffect(() => {
     document.body.classList.add('notebook-body', 'page-grid');
-    return () => document.body.classList.remove('notebook-body', 'page-grid');
+    
+    let unsubscribe;
+    if (isFirebaseMessagingConfigured && typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+      listenForPushMessages((payload) => {
+        console.log('FCM push message received:', payload);
+        if (Notification.permission === 'granted') {
+          new Notification(payload.notification?.title || 'Project Notebook', {
+            body: payload.notification?.body || 'Your project status has been updated.',
+            icon: '/favicon.svg'
+          });
+        }
+      }).then(unsub => { unsubscribe = unsub; }).catch(err => console.error('FCM listener error:', err));
+    }
+
+    return () => {
+      document.body.classList.remove('notebook-body', 'page-grid');
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   useEffect(() => {

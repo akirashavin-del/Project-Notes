@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title><!-- PROMPT: Replace with your project/site name --> Project Name</title>
+
+<style>
+  /* ============================================================
+     DESIGN TOKENS
+     PROMPT: Replace these values to match your brand.
+     - Pick 1 primary color, 1 accent color, 1-2 neutrals.
+     - Pick a display font (headings) and a body font.
+     - Keep radius/spacing consistent — don't mix scales.
+  ============================================================ */
+  :root {
+    --color-bg: #ffffff;         /* page background */
+    --color-surface: #f6f6f7;    /* cards, panels */
+    --color-text: #1a1a1a;       /* primary text */
+    --color-text-muted: #6b6b6b; /* secondary text */
+    --color-primary: #2f6feb;    /* main brand color (buttons, links) */
+    --color-primary-hover: #2558c2;
+    --color-accent: #eab308;     /* used sparingly, for highlights */
+    --color-border: #e2e2e2;
+    --color-danger: #d9342b;
+    --color-success: #1e8e5a;
+
+    --font-display: "Inter", system-ui, sans-serif; /* headings */
+    --font-body: "Inter", system-ui, sans-serif;     /* paragraphs, UI */
+
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 16px;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 16px;
+    --space-4: 24px;
+    --space-5: 40px;
+    --space-6: 64px;
+
+    --max-width: 1140px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  }
+
+  /* Basic reset */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-bg);
+    line-height: 1.5;
+  }
+  h1, h2, h3 { font-family: var(--font-display); line-height: 1.2; margin: 0 0 var(--space-2); }
+  p { margin: 0 0 var(--space-3); color: var(--color-text-muted); }
+  a { color: var(--color-primary); text-decoration: none; }
+  img { max-width: 100%; display: block; }
+  button { font-family: inherit; cursor: pointer; }
+
+  .container {
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+
+  /* ============================================================
+     NAVBAR
+     PROMPT: Add/remove nav links to match your site's actual
+     pages. Keep it to 4-6 links max for clarity.
+  ============================================================ */
+  .navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    background: var(--color-bg);
+    z-index: 10;
+  }
+  .navbar .logo {
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .navbar nav ul {
+    display: flex;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .navbar nav a { color: var(--color-text); font-weight: 500; }
+  .navbar .cta-btn { margin-left: var(--space-4); }
+
+  /* Hamburger for mobile — PROMPT: wire up with JS below to toggle .nav-open */
+  .nav-toggle { display: none; background: none; border: none; font-size: 1.5rem; }
+
+  /* ============================================================
+     HERO
+     PROMPT: This is the first thing users see. Replace headline,
+     subtext, and CTA with your product's core value proposition.
+     Consider: what's the ONE thing you want a visitor to do here?
+  ============================================================ */
+  .hero {
+    text-align: center;
+    padding: var(--space-6) var(--space-4);
+  }
+  .hero h1 {
+    font-size: clamp(2rem, 5vw, 3.25rem);
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero p {
+    max-width: 560px;
+    margin: var(--space-3) auto var(--space-4);
+    font-size: 1.125rem;
+  }
+  .hero .hero-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: center;
+  }
+
+  /* ============================================================
+     BUTTONS
+     PROMPT: Use .btn-primary for the main action, .btn-secondary
+     for a lower-emphasis alternative. Don't use more than one
+     primary button per section.
+  ============================================================ */
+  .btn {
+    display: inline-block;
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, transform 0.1s ease;
+  }
+  .btn-primary {
+    background: var(--color-primary);
+    color: #fff;
+  }
+  .btn-primary:hover { background: var(--color-primary-hover); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--color-text);
+    border-color: var(--color-border);
+  }
+  .btn-secondary:hover { background: var(--color-surface); }
+
+  /* ============================================================
+     FEATURES / VALUE PROPS
+     PROMPT: Swap in 3 (or however many you need) core features
+     or benefits. Each card = one icon/emoji, one short title,
+     one sentence of explanation. Don't overload copy here.
+  ============================================================ */
+  .features {
+    padding: var(--space-6) var(--space-4);
+    background: var(--color-surface);
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--space-4);
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  .feature-card {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+  .feature-card .icon { font-size: 1.75rem; margin-bottom: var(--space-2); }
+  .feature-card h3 { font-size: 1.1rem; }
+
+  /* ============================================================
+     CONTENT / ABOUT SECTION
+     PROMPT: Use this for a longer explanation, a demo screenshot,
+     or a two-column layout (text + image). Delete if not needed.
+  ============================================================ */
+  .content-section {
+    padding: var(--space-6) var(--space-4);
+  }
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    align-items: center;
+    max-width: var(--max-width);
+    margin: 0 auto;
+  }
+  @media (max-width: 768px) {
+    .content-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ============================================================
+     PRICING / PLANS (optional)
+     PROMPT: Delete this whole section if your product doesn't
+     have pricing tiers. Otherwise, keep to 2-4 plans max.
+  ============================================================ */
+  .pricing {
+    padding: var(--space-6) var(--space-4);
+    text-align: center;
+  }
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: var(--space-4);
+    max-width: 900px;
+    margin: var(--space-5) auto 0;
+    text-align: left;
+  }
+  .pricing-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+  }
+  .pricing-card.featured {
+    border-color: var(--color-primary);
+    box-shadow: var(--shadow-md);
+  }
+  .pricing-card .price {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: var(--space-2) 0;
+  }
+  .pricing-card ul { padding-left: var(--space-4); color: var(--color-text-muted); }
+
+  /* ============================================================
+     FORM (contact / signup / etc.)
+     PROMPT: Replace fields to match what data you actually need.
+     Wire up the JS submit handler further down to your backend.
+  ============================================================ */
+  .form-section {
+    padding: var(--space-6) var(--space-4);
+    background: var(--color-surface);
+  }
+  .form-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+  }
+  .field { margin-bottom: var(--space-3); }
+  .field label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: var(--space-1);
+    font-size: 0.9rem;
+  }
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100%;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  .field .error-text {
+    color: var(--color-danger);
+    font-size: 0.85rem;
+    margin-top: var(--space-1);
+    display: none;
+  }
+  .form-status {
+    margin-top: var(--space-2);
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  /* ============================================================
+     FOOTER
+     PROMPT: Update links/columns to match your actual sitemap.
+     Keep legal links (privacy/terms) if applicable.
+  ============================================================ */
+  .footer {
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-5) var(--space-4);
+  }
+  .footer-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-4);
+    max-width: var(--max-width);
+    margin: 0 auto var(--space-4);
+  }
+  .footer-grid h4 { font-size: 0.9rem; margin-bottom: var(--space-2); }
+  .footer-grid ul { list-style: none; padding: 0; margin: 0; }
+  .footer-grid li { margin-bottom: var(--space-1); }
+  .footer-grid a { color: var(--color-text-muted); font-size: 0.9rem; }
+  .footer-bottom {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--color-border);
+    padding-top: var(--space-3);
+  }
+
+  /* ============================================================
+     RESPONSIVE / MOBILE
+     PROMPT: Test at 375px width minimum. Adjust breakpoint(s)
+     below if your nav or grids need different behavior.
+  ============================================================ */
+  @media (max-width: 768px) {
+    .navbar nav { display: none; } /* PROMPT: swap to slide-in menu when .nav-open is toggled */
+    .nav-toggle { display: block; }
+    .hero-actions { flex-direction: column; align-items: center; }
+  }
+
+  /* Accessibility: visible focus state — do not remove */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Respect reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+       PROMPT: Replace "Project Name" and nav links.
+  ============================================================ -->
+  <header class="navbar">
+    <div class="logo">Project Name</div>
+    <nav id="primary-nav">
+      <ul>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#pricing">Pricing</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <a href="#contact" class="btn btn-primary cta-btn">Get Started</a>
+    <button class="nav-toggle" id="navToggle" aria-label="Toggle menu" aria-expanded="false">&#9776;</button>
+  </header>
+
+  <!-- ============================================================
+       HERO
+       PROMPT: One clear headline + one supporting sentence +
+       one primary action. Avoid stacking multiple messages here.
+  ============================================================ -->
+  <section class="hero">
+    <div class="container">
+      <h1>Your product's core promise, in one sentence</h1>
+      <p>One or two sentences expanding on the headline — what does this do, and who is it for?</p>
+      <div class="hero-actions">
+        <a href="#contact" class="btn btn-primary">Primary Action</a>
+        <a href="#features" class="btn btn-secondary">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FEATURES
+       PROMPT: Replace icons (emoji or swap for real icon set),
+       titles, and descriptions with your actual value props.
+  ============================================================ -->
+  <section class="features" id="features">
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="icon">⚡</div>
+        <h3>Feature One</h3>
+        <p>Short explanation of the benefit, written from the user's point of view.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">🔒</div>
+        <h3>Feature Two</h3>
+        <p>Short explanation of the benefit, written from the user's point of view.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">📈</div>
+        <h3>Feature Three</h3>
+        <p>Short explanation of the benefit, written from the user's point of view.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       ABOUT / CONTENT SECTION
+       PROMPT: Use for a deeper explanation, screenshot, or demo.
+       Delete the whole <section> if you don't need it.
+  ============================================================ -->
+  <section class="content-section" id="about">
+    <div class="content-grid">
+      <div>
+        <h2>A deeper look at what this does</h2>
+        <p>Expand here with more detail than the hero allows — how it works, why it matters, or a short story about the problem it solves.</p>
+        <a href="#contact" class="btn btn-secondary">See it in action</a>
+      </div>
+      <div>
+        <!-- PROMPT: replace with a real screenshot, illustration, or embed -->
+        <img src="https://placehold.co/560x400?text=Product+Screenshot" alt="Product screenshot placeholder" style="border-radius: var(--radius-md); border: 1px solid var(--color-border);" />
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       PRICING (optional — delete if not applicable)
+       PROMPT: Update plan names, prices, and feature lists.
+       Mark one plan .featured if you want to highlight it.
+  ============================================================ -->
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2>Simple, transparent pricing</h2>
+      <p>One sentence on how pricing works (per seat, per month, free tier, etc.)</p>
+      <div class="pricing-grid">
+        <div class="pricing-card">
+          <h3>Starter</h3>
+          <div class="price">$0</div>
+          <ul>
+            <li>Feature included</li>
+            <li>Feature included</li>
+          </ul>
+          <a href="#contact" class="btn btn-secondary" style="display:block; text-align:center;">Choose Plan</a>
+        </div>
+        <div class="pricing-card featured">
+          <h3>Pro</h3>
+          <div class="price">$19/mo</div>
+          <ul>
+            <li>Everything in Starter</li>
+            <li>Additional feature</li>
+            <li>Additional feature</li>
+          </ul>
+          <a href="#contact" class="btn btn-primary" style="display:block; text-align:center;">Choose Plan</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       CONTACT / SIGNUP FORM
+       PROMPT: Adjust fields to match what you're actually
+       collecting. Wire up the fetch() call in the script below
+       to your real backend/API endpoint.
+  ============================================================ -->
+  <section class="form-section" id="contact">
+    <div class="form-wrap">
+      <h2>Get in touch</h2>
+      <p>One sentence telling the user what happens after they submit this form.</p>
+      <form id="contactForm" novalidate>
+        <div class="field">
+          <label for="name">Name</label>
+          <input type="text" id="name" name="name" required />
+          <div class="error-text">Please enter your name.</div>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" required />
+          <div class="error-text">Please enter a valid email.</div>
+        </div>
+        <div class="field">
+          <label for="message">Message</label>
+          <textarea id="message" name="message" rows="4"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Send Message</button>
+        <p class="form-status" id="formStatus"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+       PROMPT: Update columns/links to match your real site map
+       and legal pages.
+  ============================================================ -->
+  <footer class="footer">
+    <div class="footer-grid">
+      <div>
+        <h4>Product</h4>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#about">About</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Legal</h4>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; <span id="year"></span> Project Name. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    // ============================================================
+    // MOBILE NAV TOGGLE
+    // PROMPT: Currently just shows/hides the nav list. Swap for a
+    // slide-in drawer if your design calls for it.
+    // ============================================================
+    const navToggle = document.getElementById('navToggle');
+    const primaryNav = document.getElementById('primary-nav');
+    navToggle.addEventListener('click', () => {
+      const isOpen = primaryNav.style.display === 'block';
+      primaryNav.style.display = isOpen ? 'none' : 'block';
+      navToggle.setAttribute('aria-expanded', String(!isOpen));
+    });
+
+    // ============================================================
+    // FOOTER YEAR (leave as-is, keeps copyright year current)
+    // ============================================================
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // ============================================================
+    // CONTACT FORM VALIDATION + SUBMIT
+    // PROMPT: Replace the fetch() call with your real API endpoint.
+    // Adjust validation rules to match your actual required fields.
+    // ============================================================
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('formStatus');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      let valid = true;
+
+      // reset errors
+      form.querySelectorAll('.error-text').forEach(el => el.style.display = 'none');
+
+      const name = document.getElementById('name');
+      const email = document.getElementById('email');
+
+      if (!name.value.trim()) {
+        name.nextElementSibling.style.display = 'block';
+        valid = false;
+      }
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email.value.trim())) {
+        email.nextElementSibling.style.display = 'block';
+        valid = false;
+      }
+
+      if (!valid) return;
+
+      status.style.display = 'block';
+      status.textContent = 'Sending…';
+
+      try {
+        // PROMPT: replace '/api/contact' with your real endpoint
+        // const res = await fetch('/api/contact', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify({
+        //     name: name.value,
+        //     email: email.value,
+        //     message: document.getElementById('message').value
+        //   })
+        // });
+        // if (!res.ok) throw new Error('Request failed');
+
+        status.textContent = "Thanks — we'll be in touch soon.";
+        status.style.color = 'var(--color-success)';
+        form.reset();
+      } catch (err) {
+        status.textContent = 'Something went wrong. Please try again.';
+        status.style.color = 'var(--color-danger)';
+      }
+    });
+  </script>
+
+</body>
+</html>

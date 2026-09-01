@@ -1,0 +1,456 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% ============================================================
+% 6-SLIDE UNIVERSAL PROJECT PRESENTATION TEMPLATE
+% Replace anything marked with:
+% % TODO: ...
+% ============================================================
+
+% ---------- Theme ----------
+\usetheme{default}
+\usefonttheme{professionalfonts}
+
+% ---------- Packages ----------
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{amsmath}
+
+% ---------- Colors ----------
+\definecolor{Primary}{RGB}{35,55,85}
+\definecolor{Accent}{RGB}{45,140,120}
+\definecolor{Light}{RGB}{245,247,250}
+\definecolor{Dark}{RGB}{35,35,35}
+
+% ---------- Beamer Colors ----------
+\setbeamercolor{normal text}{fg=Dark,bg=white}
+\setbeamercolor{frametitle}{fg=Primary}
+\setbeamercolor{title}{fg=Primary}
+\setbeamercolor{structure}{fg=Accent}
+\setbeamercolor{block title}{fg=white,bg=Primary}
+\setbeamercolor{block body}{fg=Dark,bg=Light}
+
+% ---------- Remove Navigation ----------
+\setbeamertemplate{navigation symbols}{}
+
+% ---------- Footer ----------
+\setbeamertemplate{footline}{
+    \hfill
+    \color{gray}\scriptsize
+    \insertframenumber{} / \inserttotalframenumber
+    \hspace{0.5cm}
+    \vspace{0.2cm}
+}
+
+% ============================================================
+% TITLE INFORMATION
+% ============================================================
+
+\title{YOUR PROJECT TITLE}
+% TODO: Write the complete project name
+
+\subtitle{Short one-line description}
+% TODO: Explain your project in one simple sentence
+
+\author{
+    Your Name \and
+    Team Member 2 \and
+    Team Member 3
+}
+% TODO: Add team members
+
+\institute{
+    Your Institution / Department
+}
+% TODO: College, university, company, lab, etc.
+
+\date{\today}
+% TODO: Replace with event/date if needed
+
+
+% ============================================================
+% DOCUMENT
+% ============================================================
+
+\begin{document}
+
+
+% ============================================================
+% SLIDE 1 — TITLE
+% ============================================================
+
+\begin{frame}
+    \titlepage
+\end{frame}
+
+
+% ============================================================
+% SLIDE 2 — PROBLEM
+% ============================================================
+
+\begin{frame}{1. The Problem}
+
+\begin{columns}[T]
+
+% ---------- Left ----------
+\column{0.58\textwidth}
+
+\textbf{\large What problem are we solving?}
+
+\vspace{0.3cm}
+
+% TODO: Describe the problem in 2–3 simple sentences.
+% Explain WHO faces the problem and WHY it matters.
+
+\begin{itemize}
+    \item Problem point 1
+    % TODO: Main pain point
+
+    \item Problem point 2
+    % TODO: Important limitation of existing solutions
+
+    \item Problem point 3
+    % TODO: Consequence / impact of the problem
+\end{itemize}
+
+\vspace{0.3cm}
+
+\begin{block}{Why does it matter?}
+% TODO: Add one strong statistic, fact, or real-world consequence.
+A short statement showing the importance of the problem.
+\end{block}
+
+
+% ---------- Right ----------
+\column{0.38\textwidth}
+
+\begin{tikzpicture}
+    \node[
+        rounded corners,
+        fill=Light,
+        minimum width=4cm,
+        minimum height=4cm,
+        align=center
+    ] {
+        \Large $\star$\\[0.3cm]
+        \textbf{CORE PROBLEM}\\[0.2cm]
+        \small
+        Visualize the\\
+        problem here
+    };
+\end{tikzpicture}
+
+% TODO:
+% Replace this box with:
+% - Problem image
+% - Diagram
+% - Statistic
+% - User illustration
+
+\end{columns}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 3 — SOLUTION
+% ============================================================
+
+\begin{frame}{2. Our Solution}
+
+\begin{center}
+
+{\Large \textbf{How does our idea solve the problem?}}
+
+\vspace{0.4cm}
+
+\begin{tikzpicture}[
+    node distance=1.0cm,
+    box/.style={
+        rounded corners,
+        draw=Primary,
+        fill=Light,
+        minimum width=3.2cm,
+        minimum height=1.2cm,
+        align=center
+    },
+    arrow/.style={
+        ->,
+        very thick,
+        color=Accent
+    }
+]
+
+\node[box] (input) {
+    \textbf{INPUT}\\
+    \small User / Data
+};
+
+\node[box, right=of input] (engine) {
+    \textbf{CORE ENGINE}\\
+    \small AI / Algorithm
+};
+
+\node[box, right=of engine] (output) {
+    \textbf{OUTPUT}\\
+    \small Useful Result
+};
+
+\draw[arrow] (input) -- (engine);
+\draw[arrow] (engine) -- (output);
+
+\end{tikzpicture}
+
+\vspace{0.7cm}
+
+% TODO: Replace the above flow with your actual system flow.
+% Example:
+% User → Image → AI Model → Prediction → Recommendation
+
+\begin{columns}
+
+\column{0.48\textwidth}
+
+\begin{block}{Key Idea}
+% TODO: Explain the core innovation in 1–2 sentences.
+What makes your solution different?
+\end{block}
+
+\column{0.48\textwidth}
+
+\begin{block}{Main Advantage}
+% TODO: State the biggest benefit.
+Faster / cheaper / more accurate / accessible / scalable
+\end{block}
+
+\end{columns}
+
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 4 — TECHNOLOGY / METHODOLOGY
+% ============================================================
+
+\begin{frame}{3. How It Works}
+
+\begin{columns}[T]
+
+\column{0.55\textwidth}
+
+\textbf{\large System / Methodology}
+
+\vspace{0.3cm}
+
+\begin{enumerate}
+
+    \item \textbf{Data / Input}
+    
+    % TODO: What enters your system?
+    % Example: Images, sensor data, user input, dataset
+
+    \item \textbf{Processing}
+    
+    % TODO: What happens to the input?
+    % Example: preprocessing, feature extraction
+
+    \item \textbf{Core Method}
+    
+    % TODO: Mention your main algorithm/model.
+    % Example: CNN, Transformer, Random Forest, Bayesian Optimization
+
+    \item \textbf{Result}
+    
+    % TODO: What does the system produce?
+
+\end{enumerate}
+
+
+\column{0.4\textwidth}
+
+\begin{tikzpicture}
+    \node[
+        rounded corners,
+        fill=Light,
+        minimum width=4.2cm,
+        minimum height=5cm,
+        align=center
+    ] {
+
+        \textbf{SYSTEM}\\[0.4cm]
+
+        Input\\
+        $\downarrow$\\
+        Processing\\
+        $\downarrow$\\
+        AI / Algorithm\\
+        $\downarrow$\\
+        Output
+
+    };
+\end{tikzpicture}
+
+% TODO:
+% Replace with your architecture diagram if available.
+
+\end{columns}
+
+\vspace{0.3cm}
+
+\textit{\small
+% TODO: Add one technical sentence describing your methodology.
+Example: ``The proposed model learns patterns from the input data and generates the required prediction.''
+}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 5 — RESULTS / IMPACT
+% ============================================================
+
+\begin{frame}{4. Results \& Impact}
+
+\begin{columns}[T]
+
+% ---------- Results ----------
+\column{0.48\textwidth}
+
+\textbf{\large Results}
+
+\vspace{0.3cm}
+
+\begin{block}{Metric 1}
+\centering
+{\Huge \textbf{XX\%}}
+
+\vspace{0.1cm}
+
+\small
+% TODO: Accuracy / improvement / efficiency / score
+\end{block}
+
+\vspace{0.2cm}
+
+\begin{block}{Metric 2}
+\centering
+{\Huge \textbf{XX}}
+
+\vspace{0.1cm}
+
+\small
+% TODO: Add another important result
+\end{block}
+
+
+% ---------- Impact ----------
+\column{0.48\textwidth}
+
+\textbf{\large Expected Impact}
+
+\vspace{0.3cm}
+
+\begin{itemize}
+
+    \item $\checkmark$ Benefit for users
+    % TODO: Who benefits?
+
+    \item $\checkmark$ Social / economic benefit
+    % TODO: What changes in the real world?
+
+    \item $\checkmark$ Environmental / technical benefit
+    % TODO: Add if relevant
+
+    \item $\checkmark$ Scalability
+    % TODO: Can this work for 100 / 10,000 / 1M users?
+
+\end{itemize}
+
+\end{columns}
+
+\vspace{0.4cm}
+
+\begin{center}
+\textbf{\large
+% TODO: Add your strongest one-line result.
+``Our approach improves X by Y\%.''
+}
+\end{center}
+
+\end{frame}
+
+
+% ============================================================
+% SLIDE 6 — CONCLUSION
+% ============================================================
+
+\begin{frame}{5. Conclusion}
+
+\begin{center}
+
+{\Huge \textbf{From Problem to Impact}}
+
+\vspace{0.5cm}
+
+% TODO: Give a 1-sentence summary of your project.
+{\large
+We developed a solution that addresses
+\textbf{[PROBLEM]} using \textbf{[TECHNOLOGY]}.
+}
+
+\vspace{0.7cm}
+
+\begin{columns}
+
+\column{0.30\textwidth}
+
+\textbf{\large Problem}
+
+\vspace{0.2cm}
+
+% TODO: One phrase describing the problem.
+
+\column{0.30\textwidth}
+
+\textbf{\large Solution}
+
+\vspace{0.2cm}
+
+% TODO: One phrase describing your solution.
+
+\column{0.30\textwidth}
+
+\textbf{\large Impact}
+
+\vspace{0.2cm}
+
+% TODO: One phrase describing the expected outcome.
+
+\end{columns}
+
+\vspace{0.8cm}
+
+\begin{block}{Future Work}
+% TODO: Mention 2–3 future improvements.
+Examples:
+Deployment, larger datasets, real-world testing, improved accuracy, scalability
+\end{block}
+
+\vspace{0.4cm}
+
+{\Large \textbf{Thank You}}
+
+\vspace{0.2cm}
+
+\small
+% TODO: Add contact / GitHub / QR code if required.
+
+\end{center}
+
+\end{frame}
+
+
+\end{document}
